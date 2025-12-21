@@ -143,53 +143,80 @@ class QRCodeController extends Controller
     }
 
     /**
-     * Convert SVG to PNG using a simple approach
-     * Note: This is a basic implementation. For production, consider using imagick or a service
+     * Convert SVG to PNG by properly parsing SVG elements
+     * QR codes from simple-qrcode use paths with M (move) and L (line) commands
      */
     private function svgToPng($svg, $size)
     {
-        // For now, create a simple workaround
-        // Since we don't have imagick, we'll create a basic PNG representation
-        // This is not ideal but will work for basic QR codes
-        
-        // Create image
+        // Create image with white background
         $image = imagecreatetruecolor($size, $size);
         $white = imagecolorallocate($image, 255, 255, 255);
         $black = imagecolorallocate($image, 0, 0, 0);
         imagefill($image, 0, 0, $white);
         
-        // Simple SVG parsing to extract QR pattern
-        // Extract paths from SVG (basic implementation)
-        preg_match_all('/<path[^>]*d="([^"]*)"[^>]*>/', $svg, $matches);
+        // Extract viewBox or width/height from SVG to determine scale
+        preg_match('/viewBox=["\']([^"\']*)["\']/', $svg, $viewBoxMatch);
+        preg_match('/width=["\'](\d+)["\']/', $svg, $widthMatch);
+        preg_match('/height=["\'](\d+)["\']/', $svg, $heightMatch);
         
-        if (!empty($matches[1])) {
-            // Parse SVG paths and draw on image
-            // This is simplified - a full implementation would parse all SVG commands
-            $scale = $size / 200; // Assuming SVG is 200x200
+        $svgWidth = isset($widthMatch[1]) ? (int)$widthMatch[1] : 200;
+        $svgHeight = isset($heightMatch[1]) ? (int)$heightMatch[1] : 200;
+        
+        if (!empty($viewBoxMatch[1])) {
+            $viewBox = preg_split('/[\s,]+/', trim($viewBoxMatch[1]));
+            if (count($viewBox) >= 4) {
+                $svgWidth = (float)$viewBox[2];
+                $svgHeight = (float)$viewBox[3];
+            }
+        }
+        
+        $scaleX = $size / $svgWidth;
+        $scaleY = $size / $svgHeight;
+        
+        // Parse rectangles
+        preg_match_all('/<rect[^>]*>/', $svg, $rectElements);
+        
+        foreach ($rectElements[0] as $rectElement) {
+            preg_match('/x=["\']([^"\']*)["\']/', $rectElement, $xMatch);
+            preg_match('/y=["\']([^"\']*)["\']/', $rectElement, $yMatch);
+            preg_match('/width=["\']([^"\']*)["\']/', $rectElement, $wMatch);
+            preg_match('/height=["\']([^"\']*)["\']/', $rectElement, $hMatch);
+            preg_match('/fill=["\']([^"\']*)["\']/', $rectElement, $fillMatch);
             
-            foreach ($matches[1] as $path) {
-                // Parse M (move) and L (line) commands
-                preg_match_all('/([ML])\s+(\d+\.?\d*)\s+(\d+\.?\d*)/', $path, $coords);
+            if (isset($xMatch[1]) && isset($yMatch[1]) && isset($wMatch[1]) && isset($hMatch[1])) {
+                $x = (float)$xMatch[1] * $scaleX;
+                $y = (float)$yMatch[1] * $scaleY;
+                $w = (float)$wMatch[1] * $scaleX;
+                $h = (float)$hMatch[1] * $scaleY;
                 
-                for ($i = 0; $i < count($coords[0]); $i++) {
-                    $x = $coords[2][$i] * $scale;
-                    $y = $coords[3][$i] * $scale;
-                    
-                    if ($i > 0) {
-                        $prevX = $coords[2][$i-1] * $scale;
-                        $prevY = $coords[3][$i-1] * $scale;
-                        imageline($image, $prevX, $prevY, $x, $y, $black);
-                    }
+                $fill = isset($fillMatch[1]) ? strtolower(trim($fillMatch[1])) : 'black';
+                if ($fill == 'black' || $fill == '#000000' || $fill == '#000' || empty($fillMatch)) {
+                    imagefilledrectangle($image, (int)$x, (int)$y, (int)($x + $w - 1), (int)($y + $h - 1), $black);
                 }
             }
-        } else {
-            // Fallback: Draw a simple pattern
-            // This is a basic fallback - not accurate but prevents errors
-            for ($x = 0; $x < $size; $x += 10) {
-                for ($y = 0; $y < $size; $y += 10) {
-                    if (($x + $y) % 20 < 10) {
-                        imagefilledrectangle($image, $x, $y, $x + 9, $y + 9, $black);
-                    }
+        }
+        
+        // Parse paths - QR codes use paths with M and L commands to create filled rectangles
+        preg_match_all('/<path[^>]*d=["\']([^"\']*)["\'][^>]*>/', $svg, $pathMatches);
+        
+        foreach ($pathMatches[1] as $pathData) {
+            $this->drawPathAsFilled($image, $pathData, $scaleX, $scaleY, $black);
+        }
+        
+        // Parse polygons
+        preg_match_all('/<polygon[^>]*points=["\']([^"\']*)["\'][^>]*>/', $svg, $polygonMatches);
+        
+        foreach ($polygonMatches[1] as $points) {
+            $coords = preg_split('/[\s,]+/', trim($points));
+            $pointCount = count($coords);
+            if ($pointCount >= 4 && $pointCount % 2 == 0) {
+                $polygon = [];
+                for ($i = 0; $i < $pointCount; $i += 2) {
+                    $polygon[] = (int)($coords[$i] * $scaleX);
+                    $polygon[] = (int)($coords[$i + 1] * $scaleY);
+                }
+                if (count($polygon) >= 6) {
+                    imagefilledpolygon($image, $polygon, count($polygon) / 2, $black);
                 }
             }
         }
@@ -201,4 +228,101 @@ class QRCodeController extends Controller
         
         return $pngData;
     }
+    
+    /**
+     * Draw SVG path as filled polygon (QR codes use paths to create filled rectangles)
+     */
+    private function drawPathAsFilled($image, $pathData, $scaleX, $scaleY, $color)
+    {
+        // QR code paths are typically: M x y L x y L x y L x y Z (forming a rectangle)
+        // We collect all points and fill the polygon
+        
+        $points = [];
+        $currentX = 0;
+        $currentY = 0;
+        $startX = 0;
+        $startY = 0;
+        
+        // Parse all coordinates from the path
+        // Handle both absolute (M, L) and relative (m, l) commands
+        preg_match_all('/([MLZmlz])([^MLZmlz]*)/', $pathData, $matches, PREG_SET_ORDER);
+        
+        foreach ($matches as $match) {
+            $cmd = $match[1];
+            $params = trim($match[2]);
+            $isAbsolute = strtoupper($cmd) == $cmd;
+            $cmdUpper = strtoupper($cmd);
+            
+            switch ($cmdUpper) {
+                case 'M':
+                    if (preg_match_all('/([\d\.]+)/', $params, $coords)) {
+                        if (count($coords[1]) >= 2) {
+                            if ($isAbsolute) {
+                                $currentX = (float)$coords[1][0] * $scaleX;
+                                $currentY = (float)$coords[1][1] * $scaleY;
+                            } else {
+                                $currentX += (float)$coords[1][0] * $scaleX;
+                                $currentY += (float)$coords[1][1] * $scaleY;
+                            }
+                            $startX = $currentX;
+                            $startY = $currentY;
+                            $points[] = [(int)$currentX, (int)$currentY];
+                        }
+                    }
+                    break;
+                    
+                case 'L':
+                    if (preg_match_all('/([\d\.\-]+)/', $params, $coords)) {
+                        for ($i = 0; $i < count($coords[1]); $i += 2) {
+                            if (isset($coords[1][$i + 1])) {
+                                if ($isAbsolute) {
+                                    $currentX = (float)$coords[1][$i] * $scaleX;
+                                    $currentY = (float)$coords[1][$i + 1] * $scaleY;
+                                } else {
+                                    $currentX += (float)$coords[1][$i] * $scaleX;
+                                    $currentY += (float)$coords[1][$i + 1] * $scaleY;
+                                }
+                                $points[] = [(int)$currentX, (int)$currentY];
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'Z':
+                    // Close path - fill the polygon
+                    if (count($points) >= 3) {
+                        $flatPoints = [];
+                        foreach ($points as $pt) {
+                            $flatPoints[] = $pt[0];
+                            $flatPoints[] = $pt[1];
+                        }
+                        // Ensure closed path
+                        if ($points[0][0] != $points[count($points)-1][0] || 
+                            $points[0][1] != $points[count($points)-1][1]) {
+                            $flatPoints[] = $points[0][0];
+                            $flatPoints[] = $points[0][1];
+                        }
+                        imagefilledpolygon($image, $flatPoints, count($points), $color);
+                    }
+                    $points = [];
+                    $currentX = $startX;
+                    $currentY = $startY;
+                    break;
+            }
+        }
+        
+        // If path wasn't closed but has enough points, fill it anyway (some QR codes don't use Z)
+        if (count($points) >= 3) {
+            $flatPoints = [];
+            foreach ($points as $pt) {
+                $flatPoints[] = $pt[0];
+                $flatPoints[] = $pt[1];
+            }
+            // Close the path
+            $flatPoints[] = $points[0][0];
+            $flatPoints[] = $points[0][1];
+            imagefilledpolygon($image, $flatPoints, count($points), $color);
+        }
+    }
+    
 }
