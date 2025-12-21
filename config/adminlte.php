@@ -324,6 +324,12 @@ return [
         ],
         ['header' => 'MANAGEMENT'],
         [
+            'text' => 'QR Code Generator',
+            'url' => 'admin/qrcode',
+            'icon' => 'fas fa-fw fa-qrcode',
+            'active' => ['admin/qrcode*'],
+        ],
+        [
             'text' => 'Popups',
             'url' => 'admin/popups',
             'icon' => 'fas fa-fw fa-window-restore',

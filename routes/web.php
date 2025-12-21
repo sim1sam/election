@@ -26,6 +26,13 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('popups', App\Http\Controllers\Admin\PopupController::class);
+    
+    // QR Code Generator
+    Route::get('/qrcode', [App\Http\Controllers\Admin\QRCodeController::class, 'index'])->name('qrcode.index');
+    Route::post('/qrcode/download-svg', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadSVG'])->name('qrcode.download-svg');
+    Route::post('/qrcode/download-png', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadPNG'])->name('qrcode.download-png');
+    Route::post('/qrcode/download-jpg', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadJPG'])->name('qrcode.download-jpg');
+    Route::get('/qrcode/preview', [App\Http\Controllers\Admin\QRCodeController::class, 'preview'])->name('qrcode.preview');
 });
 
 require __DIR__.'/auth.php';
