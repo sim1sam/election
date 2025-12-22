@@ -121,3 +121,4 @@ If none of the above works, contact your hosting provider and ask:
 - "What are the correct file permissions for Laravel?"
 
 
+
