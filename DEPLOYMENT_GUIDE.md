@@ -120,3 +120,4 @@ If none of the above works, contact your hosting provider and ask:
 - "Is mod_rewrite enabled?"
 - "What are the correct file permissions for Laravel?"
 
+
