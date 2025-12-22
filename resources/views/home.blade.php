@@ -237,6 +237,122 @@
             display: none;
         }
         
+        /* Search Section Styles */
+        .search-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .search-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .search-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .search-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .search-form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .search-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        
+        .form-control {
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn-search {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #F42A41 0%, #006A4E 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+        
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-search:active {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .search-header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-subtitle {
+                font-size: 1rem;
+            }
+        }
+        
         .modal-overlay {
             display: none;
             position: fixed;
@@ -720,7 +836,7 @@
             <h1>{{ $settings->page_title }}</h1>
         </div>
         
-        <div class="countdown-section">
+        <div class="countdown-section" id="countdownSection">
             <h2>{{ $settings->countdown_title }}</h2>
             <div class="countdown-timer">
                 <div class="countdown-item">
@@ -749,6 +865,40 @@
             <h2>{{ $settings->waiting_title }}</h2>
             <p>{{ $settings->waiting_message_1 }}</p>
             <p style="margin-top: 15px; font-size: 1.1rem;">{{ $settings->waiting_message_2 }}</p>
+        </div>
+        
+        <!-- Search Section (shown when countdown ends) -->
+        <div class="search-section hidden" id="searchSection">
+            <div class="search-header">
+                <h1 id="searchTitle">{{ $settings->post_countdown_title ?? 'ভোটার তথ্য খুঁজুন' }}</h1>
+                @if($settings->post_countdown_subtitle)
+                <p class="search-subtitle">{{ $settings->post_countdown_subtitle }}</p>
+                @endif
+            </div>
+            
+            <div class="search-form-container">
+                <form action="{{ route('voter.search.submit') }}" method="POST" class="search-form">
+                    @csrf
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ward_number">ওয়ার্ড নম্বর:</label>
+                            <input type="text" name="ward_number" id="ward_number" 
+                                   class="form-control" placeholder="ওয়ার্ড নম্বর লিখুন" 
+                                   value="{{ old('ward_number') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="date_of_birth">জন্ম তারিখ:</label>
+                            <input type="date" name="date_of_birth" id="date_of_birth" 
+                                   class="form-control" value="{{ old('date_of_birth') }}">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn-search">
+                                <i class="fas fa-search"></i> খুঁজুন
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
         
         <div class="election-info" id="electionInfo">
@@ -814,15 +964,19 @@
             const distance = infoOpenDate.getTime() - now;
             
             if (distance < 0) {
-                // Countdown ended - show all information
+                // Countdown ended - show search section
                 document.getElementById('days').textContent = '০';
                 document.getElementById('hours').textContent = '০';
                 document.getElementById('minutes').textContent = '০';
                 document.getElementById('seconds').textContent = '০';
                 document.getElementById('countdownMessage').textContent = '✅ তথ্য প্রকাশিত হয়েছে - সকল নির্বাচন তথ্য এখন দেখতে পারবেন';
                 
-                // Hide waiting message
+                // Hide waiting message and countdown section
                 document.getElementById('waitingMessage').classList.add('hidden');
+                document.getElementById('countdownSection').classList.add('hidden');
+                
+                // Show search section
+                document.getElementById('searchSection').classList.remove('hidden');
                 return;
             }
             
@@ -840,9 +994,20 @@
             document.getElementById('seconds').textContent = toBengaliNumber(seconds);
         }
         
-        // Update countdown every second
+        // Check countdown status on page load
         updateCountdown();
+        
+        // Update countdown every second
         setInterval(updateCountdown, 1000);
+        
+        // Initial check to show/hide search section
+        const now = new Date().getTime();
+        const distance = infoOpenDate.getTime() - now;
+        if (distance < 0) {
+            document.getElementById('waitingMessage').classList.add('hidden');
+            document.getElementById('countdownSection').classList.add('hidden');
+            document.getElementById('searchSection').classList.remove('hidden');
+        }
         
         // Show campaign modal on page load (only if popup exists)
         @if($popup)

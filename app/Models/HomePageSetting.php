@@ -20,6 +20,8 @@ class HomePageSetting extends Model
         'voters_section_title',
         'total_voters_label',
         'countdown_target_date',
+        'post_countdown_title',
+        'post_countdown_subtitle',
     ];
 
     protected $casts = [

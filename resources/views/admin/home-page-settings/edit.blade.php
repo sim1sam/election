@@ -216,6 +216,41 @@
                     </div>
                 </div>
 
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4 class="mb-3">Post-Countdown Search Page Settings</h4>
+                        <p class="text-muted">These fields will be shown when the countdown timer ends</p>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="post_countdown_title">Post-Countdown Page Title</label>
+                            <input type="text" name="post_countdown_title" id="post_countdown_title" 
+                                   class="form-control @error('post_countdown_title') is-invalid @enderror" 
+                                   value="{{ old('post_countdown_title', $settings->post_countdown_title) }}" 
+                                   placeholder="ভোটার তথ্য খুঁজুন">
+                            @error('post_countdown_title')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">Title shown on the search page after countdown ends</small>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="post_countdown_subtitle">Post-Countdown Page Subtitle</label>
+                            <input type="text" name="post_countdown_subtitle" id="post_countdown_subtitle" 
+                                   class="form-control @error('post_countdown_subtitle') is-invalid @enderror" 
+                                   value="{{ old('post_countdown_subtitle', $settings->post_countdown_subtitle) }}" 
+                                   placeholder="ওয়ার্ড নম্বর এবং জন্ম তারিখ দিয়ে ভোটার তথ্য খুঁজুন">
+                            @error('post_countdown_subtitle')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">Subtitle shown below the title</small>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Update Settings

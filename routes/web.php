@@ -12,6 +12,10 @@ Route::get('/', function () {
 // QR Code scan tracking
 Route::get('/qrcode/scan/{id}', [App\Http\Controllers\QRCodeScanController::class, 'track'])->name('qrcode.scan');
 
+// Voter Search (Public)
+Route::get('/search', [App\Http\Controllers\VoterSearchController::class, 'index'])->name('voter.search');
+Route::post('/search', [App\Http\Controllers\VoterSearchController::class, 'search'])->name('voter.search.submit');
+
 Route::get('/dashboard', function () {
     // Redirect admins to admin dashboard
     if (auth()->check() && auth()->user()->role === 'admin') {

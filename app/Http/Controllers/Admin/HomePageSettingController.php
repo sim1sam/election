@@ -39,6 +39,8 @@ class HomePageSettingController extends Controller
             'total_voters_label' => 'required|string|max:255',
             'countdown_target_date' => 'required|date',
             'countdown_target_time' => 'required|string',
+            'post_countdown_title' => 'nullable|string|max:255',
+            'post_countdown_subtitle' => 'nullable|string|max:255',
         ]);
 
         // Combine date and time
