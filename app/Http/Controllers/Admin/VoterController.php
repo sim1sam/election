@@ -13,9 +13,27 @@ class VoterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $voters = Voter::orderBy('id', 'asc')->paginate(20);
+        $query = Voter::query();
+
+        // Search by voter number
+        if ($request->filled('voter_number')) {
+            $query->where('voter_number', 'like', '%' . $request->voter_number . '%');
+        }
+
+        // Search by ward number
+        if ($request->filled('ward_number')) {
+            $query->where('ward_number', 'like', '%' . $request->ward_number . '%');
+        }
+
+        // Search by voter serial number
+        if ($request->filled('voter_serial_number')) {
+            $query->where('voter_serial_number', 'like', '%' . $request->voter_serial_number . '%');
+        }
+
+        $voters = $query->orderBy('id', 'asc')->paginate(20)->withQueryString();
+        
         return view('admin.voters.index', compact('voters'));
     }
 

@@ -52,8 +52,77 @@
         </div>
     @endif
 
+    <!-- Search Card -->
+    <div class="card card-primary">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-search"></i> Search Voters</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.voters.index') }}" class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="voter_number">ভোটার নম্বর (Voter Number)</label>
+                        <input type="text" 
+                               name="voter_number" 
+                               id="voter_number" 
+                               class="form-control" 
+                               value="{{ request('voter_number') }}" 
+                               placeholder="Enter voter number">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ward_number">ওয়ার্ড নম্বর (Ward Number)</label>
+                        <input type="text" 
+                               name="ward_number" 
+                               id="ward_number" 
+                               class="form-control" 
+                               value="{{ request('ward_number') }}" 
+                               placeholder="Enter ward number">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="voter_serial_number">ভোটার সিরিয়াল নম্বর (Voter Serial Number)</label>
+                        <input type="text" 
+                               name="voter_serial_number" 
+                               id="voter_serial_number" 
+                               class="form-control" 
+                               value="{{ request('voter_serial_number') }}" 
+                               placeholder="Enter voter serial number">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        @if(request()->hasAny(['voter_number', 'ward_number', 'voter_serial_number']))
+                            <a href="{{ route('admin.voters.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
+            @if(request()->hasAny(['voter_number', 'ward_number', 'voter_serial_number']))
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle"></i> 
+                    Showing search results. 
+                    <a href="{{ route('admin.voters.index') }}" class="alert-link">View all voters</a>
+                </div>
+            @endif
+            
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
