@@ -832,6 +832,12 @@
         </div>
         @endif
         
+        @if(session('error'))
+            <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.2); backdrop-filter: blur(10px); border: 2px solid rgba(255, 193, 7, 0.5); color: #fff; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+                <i class="fas fa-exclamation-triangle"></i> <strong>{{ session('error') }}</strong>
+            </div>
+        @endif
+        
         <div class="header">
             <h1>{{ $settings->page_title }}</h1>
         </div>

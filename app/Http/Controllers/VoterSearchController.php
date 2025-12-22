@@ -10,11 +10,32 @@ use Carbon\Carbon;
 class VoterSearchController extends Controller
 {
     /**
+     * Check if countdown has ended
+     */
+    private function isCountdownFinished($settings)
+    {
+        if (!$settings->countdown_target_date) {
+            return true; // If no countdown date set, allow access
+        }
+        
+        $now = Carbon::now();
+        $targetDate = Carbon::parse($settings->countdown_target_date);
+        
+        return $now->greaterThanOrEqualTo($targetDate);
+    }
+
+    /**
      * Show search form
      */
     public function index()
     {
         $settings = HomePageSetting::getSettings();
+        
+        // Check if countdown has finished
+        if (!$this->isCountdownFinished($settings)) {
+            return redirect('/')->with('error', 'ভোটার তথ্য এখনও প্রকাশিত হয়নি। অনুগ্রহ করে অপেক্ষা করুন।');
+        }
+        
         return view('voter-search', compact('settings'));
     }
 
@@ -24,6 +45,11 @@ class VoterSearchController extends Controller
     public function search(Request $request)
     {
         $settings = HomePageSetting::getSettings();
+        
+        // Check if countdown has finished
+        if (!$this->isCountdownFinished($settings)) {
+            return redirect('/')->with('error', 'ভোটার তথ্য এখনও প্রকাশিত হয়নি। অনুগ্রহ করে অপেক্ষা করুন।');
+        }
         
         $request->validate([
             'ward_number' => 'nullable|string|max:255',
