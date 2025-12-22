@@ -454,37 +454,76 @@
         
         @media (max-width: 768px) {
             .modal-content {
-                padding: 40px 25px;
+                padding: 30px 20px;
                 max-width: 95%;
             }
             
             .campaign-popup {
                 flex-direction: column;
-                gap: 25px;
+                gap: 20px;
             }
             
             .campaign-image,
             .rickshaw-symbol {
                 flex: 0 0 auto;
-                width: 250px;
-                height: 250px;
+                width: 200px;
+                height: 200px;
             }
             
             .campaign-subtitle {
-                font-size: 0.9rem;
+                font-size: 1.3rem;
+                margin-bottom: 15px;
             }
             
             .campaign-message h3 {
-                font-size: 1.8rem;
+                font-size: 2.5rem;
+                margin-bottom: 20px;
             }
             
             .campaign-message p {
-                font-size: 1.5rem;
+                font-size: 2.1rem;
             }
             
             .rickshaw-icon {
-                width: 200px;
+                width: 160px;
+                height: 130px;
+            }
+            
+            .campaign-image-placeholder {
+                font-size: 4rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 25px 15px;
+            }
+            
+            .campaign-image,
+            .rickshaw-symbol {
+                width: 160px;
                 height: 160px;
+            }
+            
+            .campaign-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .campaign-message h3 {
+                font-size: 2.2rem;
+            }
+            
+            .campaign-message p {
+                font-size: 1.9rem;
+            }
+            
+            .rickshaw-icon {
+                width: 130px;
+                height: 105px;
+            }
+            
+            .campaign-image-placeholder {
+                font-size: 3.5rem;
             }
         }
         
