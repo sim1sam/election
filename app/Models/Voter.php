@@ -19,6 +19,8 @@ class Voter extends Model
         'address',
         'polling_center_name',
         'ward_number',
+        'voter_area_number',
+        'voter_serial_number',
         'date_of_birth',
     ];
 

@@ -41,6 +41,8 @@ class VoterController extends Controller
             'address' => 'nullable|string',
             'polling_center_name' => 'nullable|string|max:255',
             'ward_number' => 'nullable|string|max:255',
+            'voter_area_number' => 'nullable|string|max:255',
+            'voter_serial_number' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
         ]);
 
@@ -80,6 +82,8 @@ class VoterController extends Controller
             'address' => 'nullable|string',
             'polling_center_name' => 'nullable|string|max:255',
             'ward_number' => 'nullable|string|max:255',
+            'voter_area_number' => 'nullable|string|max:255',
+            'voter_serial_number' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
         ]);
 
@@ -128,7 +132,8 @@ class VoterController extends Controller
         // Expected columns (in order)
         $expectedColumns = [
             'name', 'voter_number', 'father_name', 'mother_name', 
-            'occupation', 'address', 'polling_center_name', 'ward_number', 'date_of_birth'
+            'occupation', 'address', 'polling_center_name', 'ward_number', 
+            'voter_area_number', 'voter_serial_number', 'date_of_birth'
         ];
         
         $results = [
@@ -277,6 +282,8 @@ class VoterController extends Controller
                 'Address (ঠিকানা)',
                 'Polling Center Name (ভোট কেন্দ্রের নাম)',
                 'Ward Number (ওয়ার্ড নম্বর)',
+                'Voter Area Number (ভোটার এলাকার নম্বর)',
+                'Voter Serial Number (ভোটার সিরিয়াল নম্বর)',
                 'Date of Birth (জন্ম তারিখ)'
             ]);
             
@@ -291,6 +298,8 @@ class VoterController extends Controller
                 'ঢাকা, বাংলাদেশ',
                 'ঢাকা কলেজ',
                 "'১০",  // Single quote prefix for ward number
+                "'১০১",  // Single quote prefix for voter area number
+                "'১২৩৪",  // Single quote prefix for voter serial number
                 '1990-01-15'
             ]);
             

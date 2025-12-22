@@ -15,6 +15,32 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
+                            <label for="voter_area_number">ভোটার এলাকার নম্বর (Voter Area Number)</label>
+                            <input type="text" name="voter_area_number" id="voter_area_number" 
+                                   class="form-control @error('voter_area_number') is-invalid @enderror" 
+                                   value="{{ old('voter_area_number') }}">
+                            @error('voter_area_number')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="voter_serial_number">ভোটার সিরিয়াল নম্বর (Voter Serial Number)</label>
+                            <input type="text" name="voter_serial_number" id="voter_serial_number" 
+                                   class="form-control @error('voter_serial_number') is-invalid @enderror" 
+                                   value="{{ old('voter_serial_number') }}">
+                            @error('voter_serial_number')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
                             <label for="name">নাম (Name) <span class="text-danger">*</span></label>
                             <input type="text" name="name" id="name" 
                                    class="form-control @error('name') is-invalid @enderror" 

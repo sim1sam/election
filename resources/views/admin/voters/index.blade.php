@@ -67,6 +67,8 @@
                             <th>ঠিকানা</th>
                             <th>ভোট কেন্দ্র</th>
                             <th>ওয়ার্ড নম্বর</th>
+                            <th>ভোটার এলাকার নম্বর</th>
+                            <th>ভোটার সিরিয়াল নম্বর</th>
                             <th>জন্ম তারিখ</th>
                             <th>Actions</th>
                         </tr>
@@ -83,6 +85,8 @@
                                 <td>{{ Str::limit($voter->address, 30) ?? '-' }}</td>
                                 <td>{{ $voter->polling_center_name ?? '-' }}</td>
                                 <td>{{ $voter->ward_number ?? '-' }}</td>
+                                <td>{{ $voter->voter_area_number ?? '-' }}</td>
+                                <td>{{ $voter->voter_serial_number ?? '-' }}</td>
                                 <td>{{ $voter->date_of_birth ? $voter->date_of_birth->format('d/m/Y') : '-' }}</td>
                                 <td>
                                     <a href="{{ route('admin.voters.edit', $voter) }}" class="btn btn-sm btn-primary">
@@ -99,7 +103,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center">No voters found. <a href="{{ route('admin.voters.create') }}">Add one</a></td>
+                                <td colspan="13" class="text-center">No voters found. <a href="{{ route('admin.voters.create') }}">Add one</a></td>
                             </tr>
                         @endforelse
                     </tbody>

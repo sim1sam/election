@@ -325,6 +325,20 @@
                             </div>
                             @endif
                             
+                            @if($voter->voter_area_number)
+                            <div class="detail-item">
+                                <span class="detail-label">ভোটার এলাকার নম্বর:</span>
+                                <span class="detail-value">{{ $voter->voter_area_number }}</span>
+                            </div>
+                            @endif
+                            
+                            @if($voter->voter_serial_number)
+                            <div class="detail-item">
+                                <span class="detail-label">ভোটার সিরিয়াল নম্বর:</span>
+                                <span class="detail-value">{{ $voter->voter_serial_number }}</span>
+                            </div>
+                            @endif
+                            
                             @if($voter->date_of_birth)
                             <div class="detail-item">
                                 <span class="detail-label">জন্ম তারিখ:</span>
@@ -381,6 +395,20 @@
                             <div class="detail-item">
                                 <span class="detail-label">ওয়ার্ড নম্বর:</span>
                                 <span class="detail-value">{{ $voter->ward_number }}</span>
+                            </div>
+                            @endif
+                            
+                            @if($voter->voter_area_number)
+                            <div class="detail-item">
+                                <span class="detail-label">ভোটার এলাকার নম্বর:</span>
+                                <span class="detail-value">{{ $voter->voter_area_number }}</span>
+                            </div>
+                            @endif
+                            
+                            @if($voter->voter_serial_number)
+                            <div class="detail-item">
+                                <span class="detail-label">ভোটার সিরিয়াল নম্বর:</span>
+                                <span class="detail-value">{{ $voter->voter_serial_number }}</span>
                             </div>
                             @endif
                             
