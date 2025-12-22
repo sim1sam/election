@@ -110,8 +110,17 @@
                 </table>
             </div>
             
-            <div class="d-flex justify-content-center mt-3">
-                {{ $voters->links() }}
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="dataTables_info">
+                        Showing {{ $voters->firstItem() ?? 0 }} to {{ $voters->lastItem() ?? 0 }} of {{ $voters->total() }} entries
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        {{ $voters->links() }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
