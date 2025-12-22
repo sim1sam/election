@@ -193,17 +193,99 @@
         }
         
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .search-subtitle {
+                font-size: 1rem;
+            }
+            
+            .election-info-section {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .election-info-section h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            
+            .election-info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .election-info-item {
+                padding: 15px;
+            }
+            
+            .election-info-item .value {
+                font-size: 1.1rem;
+            }
+            
+            .search-section {
+                padding: 25px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .search-form-container {
+                max-width: 100%;
+            }
+            
+            .search-form {
+                padding: 20px 15px;
+            }
+            
             .form-row {
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
             
+            .form-group label {
+                font-size: 1rem;
+            }
+            
+            .form-control {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+            
+            .btn-search {
+                padding: 12px 25px;
+                font-size: 1rem;
+                width: 100%;
+            }
+            
             .search-header h1 {
                 font-size: 2rem;
             }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
             
-            .search-subtitle {
-                font-size: 1rem;
+            .election-info-section h2 {
+                font-size: 1.3rem;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
             }
         }
     </style>

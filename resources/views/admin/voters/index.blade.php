@@ -3,17 +3,20 @@
 @section('title', 'Voter Management')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
         <h1><i class="fas fa-users"></i> Voter Management</h1>
-        <div>
-            <a href="{{ route('admin.voters.download-template') }}" class="btn btn-info mr-2">
-                <i class="fas fa-download"></i> Download CSV Template
+        <div class="mt-2 mt-md-0 d-flex flex-wrap gap-2">
+            <a href="{{ route('admin.voters.download-template') }}" class="btn btn-info btn-sm">
+                <i class="fas fa-download"></i> <span class="d-none d-md-inline">Download CSV Template</span>
+                <span class="d-md-none">Template</span>
             </a>
-            <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#csvUploadModal">
-                <i class="fas fa-upload"></i> Bulk Upload CSV
+            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#csvUploadModal">
+                <i class="fas fa-upload"></i> <span class="d-none d-md-inline">Bulk Upload CSV</span>
+                <span class="d-md-none">Upload</span>
             </button>
-            <a href="{{ route('admin.voters.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Voter
+            <a href="{{ route('admin.voters.create') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> <span class="d-none d-md-inline">Add New Voter</span>
+                <span class="d-md-none">Add</span>
             </a>
         </div>
     </div>
@@ -64,7 +67,7 @@
         </div>
         <div class="card-body">
             <form method="GET" action="{{ route('admin.voters.index') }}" class="row">
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <div class="form-group">
                         <label for="voter_number">ভোটার নম্বর (Voter Number)</label>
                         <input type="text" 
@@ -75,7 +78,7 @@
                                placeholder="Enter voter number">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <div class="form-group">
                         <label for="ward_number">ওয়ার্ড নম্বর (Ward Number)</label>
                         <input type="text" 
@@ -86,7 +89,7 @@
                                placeholder="Enter ward number">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <div class="form-group">
                         <label for="voter_serial_number">ভোটার সিরিয়াল নম্বর (Voter Serial Number)</label>
                         <input type="text" 
@@ -97,13 +100,13 @@
                                placeholder="Enter voter serial number">
                     </div>
                 </div>
-                <div class="col-md-12">
+                <div class="col-12">
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary btn-block btn-sm">
                             <i class="fas fa-search"></i> Search
                         </button>
                         @if(request()->hasAny(['voter_number', 'ward_number', 'voter_serial_number']))
-                            <a href="{{ route('admin.voters.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.voters.index') }}" class="btn btn-secondary btn-block btn-sm mt-2">
                                 <i class="fas fa-times"></i> Clear
                             </a>
                         @endif
@@ -253,4 +256,57 @@
             e.target.nextElementSibling.textContent = fileName;
         });
     </script>
+@stop
+
+@section('css')
+<style>
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .table th:first-child,
+        .table td:first-child {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 1;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .card-header h3 {
+            font-size: 1.1rem;
+        }
+        
+        .content-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .table {
+            font-size: 0.75rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.35rem;
+        }
+        
+        .btn {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+    }
+</style>
 @stop

@@ -234,27 +234,46 @@
         }
         
         @media (max-width: 768px) {
-            .voters-grid {
-                grid-template-columns: 1fr;
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             
-            .detail-item {
-                flex-direction: column;
+            .search-again {
+                margin-bottom: 20px;
             }
             
-            .detail-label {
-                min-width: auto;
-                margin-bottom: 5px;
+            .btn-back {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+                width: 100%;
+                text-align: center;
             }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
+            
+            .results-header {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .results-count {
+                font-size: 1.1rem;
+            }
+            
+            .voters-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             .voter-card {
@@ -263,6 +282,83 @@
             
             .voter-name {
                 font-size: 1.3rem;
+            }
+            
+            .voter-number {
+                font-size: 1rem;
+                padding: 6px 10px;
+            }
+            
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 12px;
+            }
+            
+            .detail-label {
+                margin-bottom: 5px;
+                margin-right: 0;
+                font-size: 0.9rem;
+                min-width: auto;
+            }
+            
+            .detail-value {
+                min-width: auto;
+                margin-bottom: 5px;
+                font-size: 0.95rem;
+            }
+            
+            .btn-view-all {
+                width: 100%;
+                padding: 10px;
+                font-size: 0.95rem;
+            }
+            
+            .full-details {
+                padding: 15px;
+            }
+            
+            .details-title {
+                font-size: 1.2rem;
+            }
+            
+            .no-results {
+                padding: 30px 20px;
+            }
+            
+            .no-results h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .voter-card {
+                padding: 15px;
+            }
+            
+            .voter-name {
+                font-size: 1.2rem;
+            }
+            
+            .voter-number {
+                font-size: 0.95rem;
+            }
+            
+            .results-count {
+                font-size: 1rem;
+            }
+            
+            .detail-label,
+            .detail-value {
+                font-size: 0.9rem;
             }
         }
     </style>
