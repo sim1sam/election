@@ -15,7 +15,7 @@ class VoterController extends Controller
      */
     public function index()
     {
-        $voters = Voter::latest()->paginate(20);
+        $voters = Voter::orderBy('id', 'asc')->paginate(20);
         return view('admin.voters.index', compact('voters'));
     }
 

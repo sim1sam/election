@@ -137,7 +137,8 @@
                             <ul class="mb-0 mt-2">
                                 <li>Download the CSV template first to see the correct format</li>
                                 <li>Required columns: Name, Voter Number</li>
-                                <li><strong>Important:</strong> If your voter number starts with 0 or has leading zeros, prefix it with a single quote (') in Excel to preserve the zeros. Example: '001234 or '261000000000</li>
+                                <li>Optional columns: Father Name, Mother Name, Occupation, Address, Polling Center Name, Ward Number, <strong>Voter Area Number (ভোটার এলাকার নম্বর)</strong>, <strong>Voter Serial Number (ভোটার সিরিয়াল নম্বর)</strong>, Date of Birth</li>
+                                <li><strong>Important:</strong> If your voter number, ward number, voter area number, or voter serial number starts with 0 or has leading zeros, prefix it with a single quote (') in Excel to preserve the zeros. Example: '001234 or '261000000000</li>
                                 <li>Date format: YYYY-MM-DD, DD/MM/YYYY, M/D/YYYY, or DD-MM-YYYY (e.g., 1990-01-15, 15/01/1990, 1/15/1990)</li>
                                 <li>Voter numbers must be unique</li>
                                 <li>Maximum file size: 10MB</li>
