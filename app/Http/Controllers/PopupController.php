@@ -21,6 +21,7 @@ class PopupController extends Controller
                     'image' => $popup->image ? asset('storage/' . $popup->image) : null,
                     'icon_image' => $popup->icon_image ? asset('storage/' . $popup->icon_image) : null,
                     'title' => $popup->title,
+                    'subtitle' => $popup->subtitle,
                     'message' => $popup->message,
                 ]
             ]);

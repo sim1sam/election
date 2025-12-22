@@ -339,6 +339,14 @@
             padding: 20px;
         }
         
+        .campaign-subtitle {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            color: #666;
+        }
+        
         .campaign-message h3 {
             font-size: 2.5rem;
             font-weight: 700;
@@ -455,6 +463,10 @@
                 height: 250px;
             }
             
+            .campaign-subtitle {
+                font-size: 0.9rem;
+            }
+            
             .campaign-message h3 {
                 font-size: 1.8rem;
             }
@@ -500,6 +512,9 @@
                         @endif
                     </div>
                     <div class="campaign-message">
+                        @if($popup->subtitle)
+                            <div class="campaign-subtitle">{{ $popup->subtitle }}</div>
+                        @endif
                         <h3>{{ $popup->title }}</h3>
                         <p>{{ $popup->message }}</p>
                     </div>

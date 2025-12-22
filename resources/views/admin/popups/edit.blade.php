@@ -14,6 +14,16 @@
                 @method('PUT')
 
                 <div class="form-group">
+                    <label for="subtitle">Subtitle</label>
+                    <input type="text" name="subtitle" id="subtitle" class="form-control @error('subtitle') is-invalid @enderror" 
+                           value="{{ old('subtitle', $popup->subtitle) }}" placeholder="ঢাকা–১৩ আসনের সংসদ সদস্য পদপ্রার্থী">
+                    @error('subtitle')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                    @enderror
+                    <small class="form-text text-muted">Subtitle text that appears above the title (optional)</small>
+                </div>
+
+                <div class="form-group">
                     <label for="title">Title <span class="text-danger">*</span></label>
                     <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror" 
                            value="{{ old('title', $popup->title) }}" required>

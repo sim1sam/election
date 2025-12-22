@@ -10,6 +10,7 @@ class Popup extends Model
         'image',
         'icon_image',
         'title',
+        'subtitle',
         'message',
         'is_active',
     ];
