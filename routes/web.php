@@ -30,6 +30,11 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('popups', App\Http\Controllers\Admin\PopupController::class);
+    
+    // Voter custom routes (must be before resource route)
+    Route::get('/voters/upload', [App\Http\Controllers\Admin\VoterController::class, 'showUploadForm'])->name('voters.upload');
+    Route::post('/voters/import-csv', [App\Http\Controllers\Admin\VoterController::class, 'importCsv'])->name('voters.import-csv');
+    Route::get('/voters/download-template', [App\Http\Controllers\Admin\VoterController::class, 'downloadTemplate'])->name('voters.download-template');
     Route::resource('voters', App\Http\Controllers\Admin\VoterController::class);
     
     // QR Code Generator
