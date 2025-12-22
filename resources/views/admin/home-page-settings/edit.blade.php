@@ -138,17 +138,20 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <h4 class="mb-3">Election Information Section</h4>
+                        <h4 class="mb-3"><i class="fas fa-info-circle"></i> Election Information Section</h4>
+                        <p class="text-muted mb-3">This section displays election area information on the voter search page</p>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="election_info_title">Election Info Section Title <span class="text-danger">*</span></label>
                             <input type="text" name="election_info_title" id="election_info_title" 
                                    class="form-control @error('election_info_title') is-invalid @enderror" 
-                                   value="{{ old('election_info_title', $settings->election_info_title) }}" required>
+                                   value="{{ old('election_info_title', $settings->election_info_title) }}" 
+                                   placeholder="নির্বাচনী এলাকা তথ্য" required>
                             @error('election_info_title')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                            <small class="form-text text-muted">Title for the election information section (e.g., নির্বাচনী এলাকা তথ্য)</small>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -156,10 +159,12 @@
                             <label for="area_name">Area Name <span class="text-danger">*</span></label>
                             <input type="text" name="area_name" id="area_name" 
                                    class="form-control @error('area_name') is-invalid @enderror" 
-                                   value="{{ old('area_name', $settings->area_name) }}" required>
+                                   value="{{ old('area_name', $settings->area_name) }}" 
+                                   placeholder="ঢাকা-১৩" required>
                             @error('area_name')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                            <small class="form-text text-muted">Election area name (e.g., ঢাকা-১৩)</small>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -167,10 +172,12 @@
                             <label for="election_center">Election Center <span class="text-danger">*</span></label>
                             <input type="text" name="election_center" id="election_center" 
                                    class="form-control @error('election_center') is-invalid @enderror" 
-                                   value="{{ old('election_center', $settings->election_center) }}" required>
+                                   value="{{ old('election_center', $settings->election_center) }}" 
+                                   placeholder="50" required>
                             @error('election_center')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                            <small class="form-text text-muted">Number of election centers (e.g., 50)</small>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -178,10 +185,12 @@
                             <label for="total_voters">Total Voters <span class="text-danger">*</span></label>
                             <input type="text" name="total_voters" id="total_voters" 
                                    class="form-control @error('total_voters') is-invalid @enderror" 
-                                   value="{{ old('total_voters', $settings->total_voters) }}" required>
+                                   value="{{ old('total_voters', $settings->total_voters) }}" 
+                                   placeholder="400000" required>
                             @error('total_voters')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                            <small class="form-text text-muted">Total number of voters (e.g., 400000). Note: The actual count from database will be shown on the search page.</small>
                         </div>
                     </div>
                 </div>

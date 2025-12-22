@@ -46,6 +46,52 @@
             margin-bottom: 10px;
         }
         
+        .election-info-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .election-info-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #fff;
+        }
+        
+        .election-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .election-info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .election-info-item label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .election-info-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
         .search-section {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
@@ -405,6 +451,25 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+        
+        <!-- Election Info Section -->
+        <div class="election-info-section">
+            <h2>{{ $settings->election_info_title }}</h2>
+            <div class="election-info-grid">
+                <div class="election-info-item">
+                    <label>Area Name <span class="text-danger">*</span></label>
+                    <div class="value">{{ $settings->area_name }}</div>
+                </div>
+                <div class="election-info-item">
+                    <label>Election Center <span class="text-danger">*</span></label>
+                    <div class="value">{{ $settings->election_center }}</div>
+                </div>
+                <div class="election-info-item">
+                    <label>Total Voters <span class="text-danger">*</span></label>
+                    <div class="value">{{ $settings->total_voters }}</div>
+                </div>
             </div>
         </div>
     </div>
