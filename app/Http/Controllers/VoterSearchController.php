@@ -75,12 +75,8 @@ class VoterSearchController extends Controller
             }
         }
 
-        // If no search criteria provided, return empty results
-        if (!$request->filled('ward_number') && !$request->filled('date_of_birth')) {
-            $voters = collect([]);
-        } else {
-            $voters = $query->orderBy('name')->get();
-        }
+        // Get results - allow search with at least one field
+        $voters = $query->orderBy('name')->get();
 
         return view('voter-search-results', compact('voters', 'settings', 'request'));
     }

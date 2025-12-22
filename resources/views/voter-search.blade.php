@@ -166,6 +166,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.getElementById('date_of_birth');
+            const clearIcon = document.getElementById('clear-date-icon');
             
             if (dateInput) {
                 // Initialize Flatpickr with dd/mm/yyyy format
@@ -181,9 +182,39 @@
                         // Ensure format is maintained
                         if (dateStr) {
                             instance.input.value = dateStr;
+                            toggleClearIcon();
+                        } else {
+                            instance.input.value = '';
+                            toggleClearIcon();
                         }
+                    },
+                    onClose: function(selectedDates, dateStr, instance) {
+                        toggleClearIcon();
                     }
                 });
+                
+                // Toggle clear icon visibility
+                function toggleClearIcon() {
+                    if (clearIcon) {
+                        if (dateInput.value && dateInput.value.trim() !== '') {
+                            clearIcon.style.display = 'block';
+                        } else {
+                            clearIcon.style.display = 'none';
+                        }
+                    }
+                }
+                
+                // Clear button functionality
+                if (clearIcon) {
+                    clearIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dateInput.value = '';
+                        flatpickrInstance.clear();
+                        toggleClearIcon();
+                        dateInput.focus();
+                    });
+                }
                 
                 // Make the calendar icon clickable
                 const calendarIcon = document.getElementById('calendar-icon');
@@ -195,19 +226,61 @@
                     });
                 }
                 
-                // Allow manual input formatting
+                // Allow manual input formatting with proper backspace handling
+                let lastValue = '';
                 dateInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                    let value = e.target.value;
+                    const cursorPos = e.target.selectionStart;
+                    
+                    // If backspace was pressed and we're removing a slash, handle it properly
+                    if (value.length < lastValue.length && (lastValue.endsWith('/') || value.includes('//'))) {
+                        value = value.replace(/\//g, '');
+                    }
+                    
+                    // Remove all non-digits
+                    let digitsOnly = value.replace(/\D/g, '');
                     
                     // Format as dd/mm/yyyy
-                    if (value.length >= 2) {
-                        value = value.substring(0, 2) + '/' + value.substring(2);
-                    }
-                    if (value.length >= 5) {
-                        value = value.substring(0, 5) + '/' + value.substring(5, 9);
+                    let formatted = '';
+                    if (digitsOnly.length > 0) {
+                        formatted = digitsOnly.substring(0, 2);
+                        if (digitsOnly.length > 2) {
+                            formatted += '/' + digitsOnly.substring(2, 4);
+                        }
+                        if (digitsOnly.length > 4) {
+                            formatted += '/' + digitsOnly.substring(4, 8);
+                        }
                     }
                     
-                    e.target.value = value;
+                    e.target.value = formatted;
+                    lastValue = formatted;
+                    
+                    // Restore cursor position
+                    let newCursorPos = cursorPos;
+                    if (formatted.length > lastValue.length && formatted.charAt(cursorPos - 1) === '/') {
+                        newCursorPos = cursorPos + 1;
+                    }
+                    e.target.setSelectionRange(newCursorPos, newCursorPos);
+                    
+                    toggleClearIcon();
+                });
+                
+                // Handle backspace key specifically
+                dateInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace') {
+                        const cursorPos = e.target.selectionStart;
+                        const value = e.target.value;
+                        
+                        // If cursor is right after a slash, remove the slash and previous character
+                        if (cursorPos > 0 && value.charAt(cursorPos - 1) === '/') {
+                            e.preventDefault();
+                            const beforeSlash = value.substring(0, cursorPos - 2);
+                            const afterSlash = value.substring(cursorPos);
+                            e.target.value = (beforeSlash + afterSlash).replace(/\D/g, '');
+                            e.target.setSelectionRange(cursorPos - 2, cursorPos - 2);
+                            toggleClearIcon();
+                        }
+                    }
                 });
                 
                 // Handle paste
@@ -224,13 +297,42 @@
                     }
                     
                     e.target.value = pasted;
+                    lastValue = pasted;
+                    toggleClearIcon();
+                    
                     // Update flatpickr with the pasted value
                     try {
-                        flatpickrInstance.setDate(pasted, false, "d/m/Y");
+                        if (pasted.length === 10) {
+                            flatpickrInstance.setDate(pasted, false, "d/m/Y");
+                        }
                     } catch (err) {
                         // If parsing fails, just keep the formatted value
                     }
                 });
+                
+                // Show/hide clear icon on focus/blur
+                dateInput.addEventListener('focus', toggleClearIcon);
+                dateInput.addEventListener('blur', function() {
+                    // Validate the date format on blur
+                    const value = dateInput.value.trim();
+                    if (value && value.length === 10) {
+                        const parts = value.split('/');
+                        if (parts.length === 3) {
+                            const day = parseInt(parts[0]);
+                            const month = parseInt(parts[1]);
+                            const year = parseInt(parts[2]);
+                            
+                            // Basic validation
+                            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
+                                // Invalid date, but keep the value for user to correct
+                            }
+                        }
+                    }
+                    toggleClearIcon();
+                });
+                
+                // Initial toggle
+                toggleClearIcon();
             }
         });
     </script>
@@ -264,8 +366,14 @@
                                        value="{{ old('date_of_birth') }}"
                                        pattern="\d{2}/\d{2}/\d{4}"
                                        maxlength="10">
-                                <i class="fas fa-calendar-alt" id="calendar-icon"
-                                   style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7; z-index: 10;"></i>
+                                <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; align-items: center;">
+                                    <i class="fas fa-times clear-date" id="clear-date-icon"
+                                       style="cursor: pointer; opacity: 0.7; display: none; padding: 5px;"
+                                       title="Clear"></i>
+                                    <i class="fas fa-calendar-alt" id="calendar-icon"
+                                       style="cursor: pointer; opacity: 0.7; padding: 5px;"
+                                       title="Select Date"></i>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
