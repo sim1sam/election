@@ -342,6 +342,12 @@ return [
             'active' => ['admin/home-page-settings*'],
         ],
         [
+            'text' => 'Voter Management',
+            'url' => 'admin/voters',
+            'icon' => 'fas fa-fw fa-users',
+            'active' => ['admin/voters*'],
+        ],
+        [
             'text' => 'Users',
             'url' => '#',
             'icon' => 'fas fa-fw fa-users',
