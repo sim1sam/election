@@ -75,8 +75,12 @@ class VoterSearchController extends Controller
             }
         }
 
-        // Get results - allow search with at least one field
-        $voters = $query->orderBy('name')->get();
+        // Only show results if BOTH fields are filled
+        if ($request->filled('ward_number') && $request->filled('date_of_birth')) {
+            $voters = $query->orderBy('name')->get();
+        } else {
+            $voters = collect([]);
+        }
 
         return view('voter-search-results', compact('voters', 'settings', 'request'));
     }

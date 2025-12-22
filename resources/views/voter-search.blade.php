@@ -334,6 +334,28 @@
                 // Initial toggle
                 toggleClearIcon();
             }
+            
+            // Form validation - require both fields
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    const wardNumber = document.getElementById('ward_number').value.trim();
+                    const dateOfBirth = document.getElementById('date_of_birth').value.trim();
+                    
+                    if (!wardNumber || !dateOfBirth) {
+                        e.preventDefault();
+                        alert('অনুগ্রহ করে ওয়ার্ড নম্বর এবং জন্ম তারিখ উভয়ই প্রদান করুন।\nPlease provide both Ward Number and Date of Birth.');
+                        return false;
+                    }
+                    
+                    // Validate date format
+                    if (dateOfBirth.length !== 10 || !/^\d{2}\/\d{2}\/\d{4}$/.test(dateOfBirth)) {
+                        e.preventDefault();
+                        alert('অনুগ্রহ করে সঠিক তারিখ ফরম্যাট ব্যবহার করুন (dd/mm/yyyy)\nPlease use correct date format (dd/mm/yyyy)');
+                        return false;
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -348,17 +370,17 @@
         
         <div class="search-section">
             <div class="search-form-container">
-                <form action="{{ route('voter.search.submit') }}" method="POST" class="search-form">
+                <form action="{{ route('voter.search.submit') }}" method="POST" class="search-form" id="searchForm">
                     @csrf
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="ward_number">ওয়ার্ড নম্বর:</label>
+                            <label for="ward_number">ওয়ার্ড নম্বর: <span class="text-danger">*</span></label>
                             <input type="text" name="ward_number" id="ward_number" 
                                    class="form-control" placeholder="ওয়ার্ড নম্বর লিখুন" 
-                                   value="{{ old('ward_number') }}">
+                                   value="{{ old('ward_number') }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="date_of_birth">জন্ম তারিখ:</label>
+                            <label for="date_of_birth">জন্ম তারিখ: <span class="text-danger">*</span></label>
                             <div style="position: relative;">
                                 <input type="text" name="date_of_birth" id="date_of_birth" 
                                        class="form-control" 
