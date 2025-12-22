@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         * {
             margin: 0;
@@ -159,6 +161,79 @@
             }
         }
     </style>
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('date_of_birth');
+            
+            if (dateInput) {
+                // Initialize Flatpickr with dd/mm/yyyy format
+                const flatpickrInstance = flatpickr(dateInput, {
+                    dateFormat: "d/m/Y",
+                    allowInput: true, // Allow manual input
+                    clickOpens: true, // Open calendar on click
+                    locale: {
+                        firstDayOfWeek: 6 // Start week from Saturday (common in Bangladesh)
+                    },
+                    maxDate: "today", // Don't allow future dates
+                    onChange: function(selectedDates, dateStr, instance) {
+                        // Ensure format is maintained
+                        if (dateStr) {
+                            instance.input.value = dateStr;
+                        }
+                    }
+                });
+                
+                // Make the calendar icon clickable
+                const calendarIcon = document.getElementById('calendar-icon');
+                if (calendarIcon) {
+                    calendarIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        flatpickrInstance.open();
+                    });
+                }
+                
+                // Allow manual input formatting
+                dateInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                    
+                    // Format as dd/mm/yyyy
+                    if (value.length >= 2) {
+                        value = value.substring(0, 2) + '/' + value.substring(2);
+                    }
+                    if (value.length >= 5) {
+                        value = value.substring(0, 5) + '/' + value.substring(5, 9);
+                    }
+                    
+                    e.target.value = value;
+                });
+                
+                // Handle paste
+                dateInput.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    let pasted = (e.clipboardData || window.clipboardData).getData('text');
+                    pasted = pasted.replace(/\D/g, '');
+                    
+                    if (pasted.length >= 2) {
+                        pasted = pasted.substring(0, 2) + '/' + pasted.substring(2);
+                    }
+                    if (pasted.length >= 5) {
+                        pasted = pasted.substring(0, 5) + '/' + pasted.substring(5, 9);
+                    }
+                    
+                    e.target.value = pasted;
+                    // Update flatpickr with the pasted value
+                    try {
+                        flatpickrInstance.setDate(pasted, false, "d/m/Y");
+                    } catch (err) {
+                        // If parsing fails, just keep the formatted value
+                    }
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -182,8 +257,16 @@
                         </div>
                         <div class="form-group">
                             <label for="date_of_birth">জন্ম তারিখ:</label>
-                            <input type="date" name="date_of_birth" id="date_of_birth" 
-                                   class="form-control" value="{{ old('date_of_birth') }}">
+                            <div style="position: relative;">
+                                <input type="text" name="date_of_birth" id="date_of_birth" 
+                                       class="form-control" 
+                                       placeholder="dd/mm/yyyy" 
+                                       value="{{ old('date_of_birth') }}"
+                                       pattern="\d{2}/\d{2}/\d{4}"
+                                       maxlength="10">
+                                <i class="fas fa-calendar-alt" id="calendar-icon"
+                                   style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7; z-index: 10;"></i>
+                            </div>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn-search">

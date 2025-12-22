@@ -40,7 +40,35 @@ class VoterSearchController extends Controller
         // Search by date of birth
         if ($request->filled('date_of_birth')) {
             try {
-                $searchDate = Carbon::parse($request->date_of_birth)->format('Y-m-d');
+                $dateValue = trim($request->date_of_birth);
+                $searchDate = null;
+                
+                // Try multiple date formats in order of preference
+                $formats = [
+                    'd/m/Y',      // dd/mm/yyyy (preferred format)
+                    'd-m-Y',      // dd-mm-yyyy
+                    'Y-m-d',      // yyyy-mm-dd (ISO format)
+                    'm/d/Y',      // mm/dd/yyyy (US format)
+                ];
+                
+                foreach ($formats as $format) {
+                    try {
+                        $parsedDate = Carbon::createFromFormat($format, $dateValue);
+                        if ($parsedDate) {
+                            $searchDate = $parsedDate->format('Y-m-d');
+                            break;
+                        }
+                    } catch (\Exception $e) {
+                        // Try next format
+                        continue;
+                    }
+                }
+                
+                // If no format matched, try Carbon's parse (more flexible)
+                if (!$searchDate) {
+                    $searchDate = Carbon::parse($dateValue)->format('Y-m-d');
+                }
+                
                 $query->whereDate('date_of_birth', $searchDate);
             } catch (\Exception $e) {
                 // Invalid date format, skip this filter
