@@ -336,6 +336,12 @@ return [
             'active' => ['admin/popups*'],
         ],
         [
+            'text' => 'Home Page Settings',
+            'url' => 'admin/home-page-settings/edit',
+            'icon' => 'fas fa-fw fa-home',
+            'active' => ['admin/home-page-settings*'],
+        ],
+        [
             'text' => 'Users',
             'url' => '#',
             'icon' => 'fas fa-fw fa-users',

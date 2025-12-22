@@ -67,6 +67,13 @@
             margin-bottom: 20px;
         }
         
+        @media (max-width: 480px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+        
         .info-item {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
@@ -486,12 +493,47 @@
                 font-size: 2rem;
             }
             
+            .election-info h2,
+            .voters-section h2 {
+                font-size: 1.5rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .info-item {
+                padding: 15px;
+            }
+            
+            .info-item .value {
+                font-size: 1.1rem;
+            }
+            
+            .election-info,
+            .voters-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
             .voters-table {
                 overflow-x: auto;
             }
             
             .voters-table table {
                 min-width: 600px;
+            }
+            
+            .voters-table th,
+            .voters-table td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+            
+            .total-voters {
+                font-size: 1rem;
+                padding: 12px;
             }
         }
     </style>
@@ -591,11 +633,11 @@
         @endif
         
         <div class="header">
-            <h1>🇧🇩 নির্বাচন তথ্য</h1>
+            <h1>{{ $settings->page_title }}</h1>
         </div>
         
         <div class="countdown-section">
-            <h2>⏰ তথ্য প্রকাশের তারিখ পর্যন্ত অবশিষ্ট সময়</h2>
+            <h2>{{ $settings->countdown_title }}</h2>
             <div class="countdown-timer">
                 <div class="countdown-item">
                     <span class="countdown-number" id="days">০</span>
@@ -615,102 +657,51 @@
                 </div>
             </div>
             <div class="countdown-message" id="countdownMessage">
-                📋 তথ্য প্রকাশের অপেক্ষায়...
+                {{ $settings->countdown_message }}
             </div>
         </div>
         
         <div class="waiting-message" id="waitingMessage">
-            <h2>⏳ তথ্য প্রকাশের অপেক্ষায়</h2>
-            <p>নির্ধারিত তারিখে সকল নির্বাচন তথ্য এখানে প্রকাশ করা হবে।</p>
-            <p style="margin-top: 15px; font-size: 1.1rem;">অনুগ্রহ করে অপেক্ষা করুন...</p>
+            <h2>{{ $settings->waiting_title }}</h2>
+            <p>{{ $settings->waiting_message_1 }}</p>
+            <p style="margin-top: 15px; font-size: 1.1rem;">{{ $settings->waiting_message_2 }}</p>
         </div>
         
-        <div class="election-info hidden" id="electionInfo">
-            <h2>নির্বাচনী এলাকা তথ্য</h2>
+        <div class="election-info" id="electionInfo">
+            <h2>{{ $settings->election_info_title }}</h2>
             <div class="info-grid">
                 <div class="info-item">
                     <label>এলাকা নাম</label>
-                    <div class="value">ঢাকা-১</div>
+                    <div class="value">{{ $settings->area_name }}</div>
                 </div>
                 <div class="info-item">
                     <label>নির্বাচনী কেন্দ্র</label>
-                    <div class="value">১০</div>
+                    <div class="value">{{ $settings->election_center }}</div>
                 </div>
                 <div class="info-item">
                     <label>মোট ভোটার</label>
-                    <div class="value">৫০,০০০</div>
+                    <div class="value">{{ $settings->total_voters }}</div>
                 </div>
                 <div class="info-item">
                     <label>তথ্য প্রকাশের তারিখ</label>
-                    <div class="value" id="infoOpenDate">২০২৪-১২-১৫</div>
+                    <div class="value" id="infoOpenDate"></div>
                 </div>
             </div>
         </div>
         
-        <div class="voters-section hidden" id="votersSection">
-            <h2>সকল ভোটার তালিকা</h2>
-            <div class="voters-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ক্রমিক নং</th>
-                            <th>ভোটার নাম</th>
-                            <th>ভোটার আইডি</th>
-                            <th>ঠিকানা</th>
-                            <th>মোবাইল</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>১</td>
-                            <td>আহমেদ হাসান</td>
-                            <td>V-001234</td>
-                            <td>ঢাকা</td>
-                            <td>০১৭১২৩৪৫৬৭৮</td>
-                        </tr>
-                        <tr>
-                            <td>২</td>
-                            <td>ফাতেমা খাতুন</td>
-                            <td>V-001235</td>
-                            <td>ঢাকা</td>
-                            <td>০১৮১২৩৪৫৬৭৮</td>
-                        </tr>
-                        <tr>
-                            <td>৩</td>
-                            <td>করিম উদ্দিন</td>
-                            <td>V-001236</td>
-                            <td>ঢাকা</td>
-                            <td>০১৯১২৩৪৫৬৭৮</td>
-                        </tr>
-                        <tr>
-                            <td>৪</td>
-                            <td>রোকেয়া বেগম</td>
-                            <td>V-001237</td>
-                            <td>ঢাকা</td>
-                            <td>০১৫১২৩৪৫৬৭৮</td>
-                        </tr>
-                        <tr>
-                            <td>৫</td>
-                            <td>মোহাম্মদ আলী</td>
-                            <td>V-001238</td>
-                            <td>ঢাকা</td>
-                            <td>০১৬১২৩৪৫৬৭৮</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="total-voters">
-                মোট ভোটার সংখ্যা: ৫০,০০০
-            </div>
-        </div>
     </div>
     
     <script>
-        // Set information opening date to 20 days from now
-        const now = new Date();
-        const infoOpenDate = new Date(now);
-        infoOpenDate.setDate(infoOpenDate.getDate() + 20);
-        infoOpenDate.setHours(8, 0, 0, 0); // Set to 8 AM
+        // Get countdown target date from settings
+        @if($settings->countdown_target_date)
+            const infoOpenDate = new Date('{{ $settings->countdown_target_date->format('Y-m-d H:i:s') }}');
+        @else
+            // Fallback: Set to 20 days from now if not set
+            const now = new Date();
+            const infoOpenDate = new Date(now);
+            infoOpenDate.setDate(infoOpenDate.getDate() + 20);
+            infoOpenDate.setHours(8, 0, 0, 0);
+        @endif
         
         // Format date for display
         const formatDate = (date) => {
@@ -748,17 +739,11 @@
                 
                 // Hide waiting message
                 document.getElementById('waitingMessage').classList.add('hidden');
-                
-                // Show election info and voters section
-                document.getElementById('electionInfo').classList.remove('hidden');
-                document.getElementById('votersSection').classList.remove('hidden');
                 return;
             }
             
-            // Countdown still active - hide information
+            // Countdown still active - show waiting message
             document.getElementById('waitingMessage').classList.remove('hidden');
-            document.getElementById('electionInfo').classList.add('hidden');
-            document.getElementById('votersSection').classList.add('hidden');
             
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

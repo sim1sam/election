@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $popup = \App\Models\Popup::getActive();
-    return view('home', compact('popup'));
+    $settings = \App\Models\HomePageSetting::getSettings();
+    return view('home', compact('popup', 'settings'));
 });
 
 Route::get('/dashboard', function () {
@@ -33,6 +34,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/qrcode/download-png', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadPNG'])->name('qrcode.download-png');
     Route::post('/qrcode/download-jpg', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadJPG'])->name('qrcode.download-jpg');
     Route::get('/qrcode/preview', [App\Http\Controllers\Admin\QRCodeController::class, 'preview'])->name('qrcode.preview');
+    
+    // Home Page Settings
+    Route::get('/home-page-settings/edit', [App\Http\Controllers\Admin\HomePageSettingController::class, 'edit'])->name('home-page-settings.edit');
+    Route::put('/home-page-settings', [App\Http\Controllers\Admin\HomePageSettingController::class, 'update'])->name('home-page-settings.update');
 });
 
 require __DIR__.'/auth.php';
