@@ -265,7 +265,7 @@
         }
         
         .modal-content {
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             border-radius: 20px;
             padding: 60px;
             max-width: 1200px;
@@ -273,6 +273,57 @@
             box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
             position: relative;
             animation: slideUp 0.4s ease;
+            overflow: hidden;
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(
+                90deg,
+                #F42A41 0%,
+                #F42A41 10%,
+                transparent 15%,
+                transparent 85%,
+                #F42A41 90%,
+                #F42A41 100%
+            );
+            background-size: 200% 100%;
+            border-radius: 23px;
+            z-index: 0;
+            animation: borderRun 2s linear infinite;
+            box-shadow: 0 0 20px rgba(244, 42, 65, 0.8),
+                        0 0 40px rgba(244, 42, 65, 0.6);
+        }
+        
+        @keyframes borderRun {
+            0% {
+                background-position: -100% 0%;
+            }
+            100% {
+                background-position: 200% 0%;
+            }
+        }
+        
+        .modal-content::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ffffff;
+            border-radius: 20px;
+            z-index: 1;
+        }
+        
+        .modal-content > * {
+            position: relative;
+            z-index: 2;
         }
         
         @keyframes slideUp {
@@ -395,27 +446,21 @@
         }
         
         .rickshaw-container {
-            animation: rickshawMoveForward 3s ease-in-out infinite;
+            animation: rickshawZoom 4s ease-in-out infinite;
             position: relative;
             width: 100%;
             height: 100%;
         }
         
-        @keyframes rickshawMoveForward {
+        @keyframes rickshawZoom {
             0% {
-                transform: translateX(-80px) translateY(5px);
-            }
-            25% {
-                transform: translateX(-40px) translateY(0px);
+                transform: scale(1);
             }
             50% {
-                transform: translateX(0px) translateY(5px);
-            }
-            75% {
-                transform: translateX(40px) translateY(0px);
+                transform: scale(1.15);
             }
             100% {
-                transform: translateX(80px) translateY(5px);
+                transform: scale(1);
             }
         }
         
