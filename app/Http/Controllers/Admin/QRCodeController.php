@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\QRCode as QRCodeModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -15,7 +17,62 @@ class QRCodeController extends Controller
      */
     public function index()
     {
-        return view('admin.qrcode.index');
+        $qrCodes = QRCodeModel::latest()->paginate(12);
+        return view('admin.qrcode.index', compact('qrCodes'));
+    }
+
+    /**
+     * Store QR code in database
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url|max:2048',
+            'size' => 'nullable|integer|min:100|max:1000',
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $url = $request->input('url');
+        $size = $request->input('size', 300);
+        $title = $request->input('title');
+
+        // Generate SVG
+        $svg = QrCode::format('svg')
+            ->size($size)
+            ->generate($url);
+
+        // Save QR code to database
+        $qrCode = QRCodeModel::create([
+            'url' => $url,
+            'size' => $size,
+            'format' => 'svg',
+            'svg_content' => $svg,
+            'title' => $title,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR code saved successfully!',
+            'qr_code' => $qrCode
+        ]);
+    }
+
+    /**
+     * Delete QR code
+     */
+    public function destroy($id)
+    {
+        $qrCode = QRCodeModel::findOrFail($id);
+        
+        // Delete file if exists
+        if ($qrCode->file_path && Storage::disk('public')->exists($qrCode->file_path)) {
+            Storage::disk('public')->delete($qrCode->file_path);
+        }
+        
+        $qrCode->delete();
+
+        return redirect()->route('admin.qrcode.index')
+            ->with('success', 'QR code deleted successfully.');
     }
 
     /**
@@ -58,17 +115,43 @@ class QRCodeController extends Controller
 
         $filename = 'qrcode-' . time() . '.png';
         
-        // Generate SVG first (doesn't require imagick)
-        $svg = QrCode::format('svg')
-            ->size($size)
-            ->generate($url);
-        
-        // Convert SVG to PNG using Intervention Image
-        $pngData = $this->svgToPng($svg, $size);
-        
-        return response($pngData)
-            ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        try {
+            // Try to generate PNG directly first
+            try {
+                $pngData = QrCode::format('png')
+                    ->size($size)
+                    ->generate($url);
+                
+                if ($pngData && !empty($pngData)) {
+                    return response($pngData, 200)
+                        ->header('Content-Type', 'image/png')
+                        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                        ->header('Content-Length', strlen($pngData));
+                }
+            } catch (\Exception $e) {
+                // If PNG format not available, convert from SVG
+            }
+            
+            // Generate SVG first (doesn't require imagick)
+            $svg = QrCode::format('svg')
+                ->size($size)
+                ->generate($url);
+            
+            // Convert SVG to PNG
+            $pngData = $this->svgToPng($svg, $size);
+            
+            if (!$pngData || empty($pngData)) {
+                abort(500, 'Failed to generate PNG from QR code');
+            }
+            
+            return response($pngData, 200)
+                ->header('Content-Type', 'image/png')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Content-Length', strlen($pngData));
+                
+        } catch (\Exception $e) {
+            abort(500, 'Error generating PNG: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -115,9 +198,14 @@ class QRCodeController extends Controller
         imagedestroy($image);
         imagedestroy($jpgImage);
         
-        return response($jpgData)
+        if (!$jpgData || empty($jpgData)) {
+            abort(500, 'Failed to generate JPG from QR code');
+        }
+        
+        return response($jpgData, 200)
             ->header('Content-Type', 'image/jpeg')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->header('Content-Length', strlen($jpgData));
     }
 
     /**
@@ -222,9 +310,13 @@ class QRCodeController extends Controller
         }
         
         ob_start();
-        imagepng($image);
+        $result = imagepng($image);
         $pngData = ob_get_clean();
         imagedestroy($image);
+        
+        if (!$result || empty($pngData)) {
+            return null;
+        }
         
         return $pngData;
     }

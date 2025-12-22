@@ -9,6 +9,15 @@
 @stop
 
 @section('content')
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-md-6">
             <div class="card">
@@ -27,6 +36,16 @@
                                    placeholder="https://example.com" 
                                    required>
                             <small class="form-text text-muted">Enter the URL you want to convert to QR code</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title">Title (Optional)</label>
+                            <input type="text" 
+                                   name="title" 
+                                   id="title" 
+                                   class="form-control" 
+                                   placeholder="QR Code Title">
+                            <small class="form-text text-muted">Optional title for this QR code</small>
                         </div>
 
                         <div class="form-group">
@@ -63,6 +82,10 @@
                     </div>
                     
                     <div id="downloadButtons" class="mt-3" style="display: none;">
+                        <button type="button" class="btn btn-success mb-2" onclick="saveQRCode()">
+                            <i class="fas fa-save"></i> Save QR Code
+                        </button>
+                        <br>
                         <form action="{{ route('admin.qrcode.download-svg') }}" method="POST" class="d-inline">
                             @csrf
                             <input type="hidden" name="url" id="downloadUrlSvg">
@@ -90,6 +113,87 @@
                             </button>
                         </form>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-list"></i> Saved QR Codes</h3>
+                </div>
+                <div class="card-body">
+                    @if($qrCodes->count() > 0)
+                        <div class="row">
+                            @foreach($qrCodes as $qrCode)
+                                <div class="col-md-3 col-sm-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-2">
+                                                {!! $qrCode->svg_content !!}
+                                            </div>
+                                            @if($qrCode->title)
+                                                <h5 class="card-title">{{ $qrCode->title }}</h5>
+                                            @endif
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <a href="{{ $qrCode->url }}" target="_blank" class="text-truncate d-block">
+                                                        {{ Str::limit($qrCode->url, 30) }}
+                                                    </a>
+                                                </small>
+                                            </p>
+                                            <p class="card-text">
+                                                <small class="text-muted">Size: {{ $qrCode->size }}px</small><br>
+                                                <small class="text-muted">Created: {{ $qrCode->created_at->format('M d, Y') }}</small>
+                                            </p>
+                                            <div class="btn-group-vertical w-100" role="group">
+                                                <div class="btn-group mb-2" role="group">
+                                                    <form action="{{ route('admin.qrcode.download-svg') }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="url" value="{{ $qrCode->url }}">
+                                                        <input type="hidden" name="size" value="{{ $qrCode->size }}">
+                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-download"></i> SVG
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.qrcode.download-png') }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="url" value="{{ $qrCode->url }}">
+                                                        <input type="hidden" name="size" value="{{ $qrCode->size }}">
+                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                            <i class="fas fa-download"></i> PNG
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.qrcode.download-jpg') }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="url" value="{{ $qrCode->url }}">
+                                                        <input type="hidden" name="size" value="{{ $qrCode->size }}">
+                                                        <button type="submit" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-download"></i> JPG
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                <form action="{{ route('admin.qrcode.destroy', $qrCode->id) }}" method="POST" class="d-inline w-100">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Are you sure you want to delete this QR code?')">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            {{ $qrCodes->links() }}
+                        </div>
+                    @else
+                        <p class="text-center text-muted">No QR codes saved yet. Generate and save your first QR code!</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -146,6 +250,54 @@
             generateQRCode();
         }
     });
+
+    function saveQRCode() {
+        const url = document.getElementById('url').value;
+        const size = document.getElementById('size').value || 300;
+        const title = document.getElementById('title').value;
+
+        if (!url) {
+            alert('Please enter a URL first');
+            return;
+        }
+
+        // Show loading
+        const saveBtn = event.target;
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        // Save QR code
+        fetch('{{ route("admin.qrcode.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                url: url,
+                size: size,
+                title: title
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('QR code saved successfully!');
+                location.reload();
+            } else {
+                alert('Error saving QR code');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error saving QR code');
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+        });
+    }
 </script>
 @stop
 

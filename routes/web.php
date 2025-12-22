@@ -30,6 +30,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     
     // QR Code Generator
     Route::get('/qrcode', [App\Http\Controllers\Admin\QRCodeController::class, 'index'])->name('qrcode.index');
+    Route::post('/qrcode', [App\Http\Controllers\Admin\QRCodeController::class, 'store'])->name('qrcode.store');
+    Route::delete('/qrcode/{id}', [App\Http\Controllers\Admin\QRCodeController::class, 'destroy'])->name('qrcode.destroy');
     Route::post('/qrcode/download-svg', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadSVG'])->name('qrcode.download-svg');
     Route::post('/qrcode/download-png', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadPNG'])->name('qrcode.download-png');
     Route::post('/qrcode/download-jpg', [App\Http\Controllers\Admin\QRCodeController::class, 'downloadJPG'])->name('qrcode.download-jpg');
