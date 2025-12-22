@@ -9,6 +9,9 @@ Route::get('/', function () {
     return view('home', compact('popup', 'settings'));
 });
 
+// QR Code scan tracking
+Route::get('/qrcode/scan/{id}', [App\Http\Controllers\QRCodeScanController::class, 'track'])->name('qrcode.scan');
+
 Route::get('/dashboard', function () {
     // Redirect admins to admin dashboard
     if (auth()->check() && auth()->user()->role === 'admin') {

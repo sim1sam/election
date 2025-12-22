@@ -15,9 +15,19 @@ class QRCode extends Model
         'file_path',
         'svg_content',
         'title',
+        'scan_count',
     ];
 
     protected $casts = [
         'size' => 'integer',
+        'scan_count' => 'integer',
     ];
+    
+    /**
+     * Increment scan count
+     */
+    public function incrementScan()
+    {
+        $this->increment('scan_count');
+    }
 }

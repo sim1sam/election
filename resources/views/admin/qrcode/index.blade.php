@@ -139,14 +139,22 @@
                                             @endif
                                             <p class="card-text">
                                                 <small class="text-muted">
-                                                    <a href="{{ $qrCode->url }}" target="_blank" class="text-truncate d-block">
+                                                    <strong>URL:</strong><br>
+                                                    <a href="{{ route('qrcode.scan', $qrCode->id) }}" target="_blank" class="text-truncate d-block" title="{{ $qrCode->url }}">
                                                         {{ Str::limit($qrCode->url, 30) }}
                                                     </a>
+                                                    <small class="text-muted">(Click to test scan tracking)</small>
                                                 </small>
                                             </p>
                                             <p class="card-text">
                                                 <small class="text-muted">Size: {{ $qrCode->size }}px</small><br>
-                                                <small class="text-muted">Created: {{ $qrCode->created_at->format('M d, Y') }}</small>
+                                                <small class="text-muted">Created: {{ $qrCode->created_at->format('M d, Y') }}</small><br>
+                                                <small class="text-info font-weight-bold">
+                                                    <i class="fas fa-eye"></i> Scanned: {{ $qrCode->scan_count }} time(s)
+                                                </small><br>
+                                                <small class="text-success">
+                                                    <i class="fas fa-infinity"></i> Unlimited (Lifetime)
+                                                </small>
                                             </p>
                                             <div class="btn-group-vertical w-100" role="group">
                                                 <div class="btn-group mb-2" role="group">

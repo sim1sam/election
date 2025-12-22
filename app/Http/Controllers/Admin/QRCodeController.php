@@ -41,14 +41,24 @@ class QRCodeController extends Controller
             ->size($size)
             ->generate($url);
 
-        // Save QR code to database
+        // Save QR code to database first to get ID
         $qrCode = QRCodeModel::create([
             'url' => $url,
             'size' => $size,
             'format' => 'svg',
             'svg_content' => $svg,
             'title' => $title,
+            'scan_count' => 0,
         ]);
+
+        // Regenerate QR code with tracking URL
+        $trackingUrl = route('qrcode.scan', $qrCode->id);
+        $trackingSvg = QrCode::format('svg')
+            ->size($size)
+            ->generate($trackingUrl);
+        
+        // Update with tracking QR code
+        $qrCode->update(['svg_content' => $trackingSvg]);
 
         return response()->json([
             'success' => true,
@@ -115,42 +125,83 @@ class QRCodeController extends Controller
 
         $filename = 'qrcode-' . time() . '.png';
         
-        try {
-            // Try to generate PNG directly first
-            try {
-                $pngData = QrCode::format('png')
-                    ->size($size)
-                    ->generate($url);
-                
-                if ($pngData && !empty($pngData)) {
-                    return response($pngData, 200)
-                        ->header('Content-Type', 'image/png')
-                        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
-                        ->header('Content-Length', strlen($pngData));
-                }
-            } catch (\Exception $e) {
-                // If PNG format not available, convert from SVG
+        // Create image directly using GD
+        $image = imagecreatetruecolor($size, $size);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 0, 0, 0);
+        imagefill($image, 0, 0, $white);
+        
+        // Generate SVG to get QR code pattern
+        $svg = QrCode::format('svg')
+            ->size($size)
+            ->generate($url);
+        
+        // Parse SVG and draw on image
+        $this->drawSvgOnImage($image, $svg, $size, $black);
+        
+        // Output as PNG
+        ob_start();
+        imagepng($image);
+        $pngData = ob_get_clean();
+        imagedestroy($image);
+        
+        if (empty($pngData) || substr($pngData, 0, 8) !== "\x89PNG\r\n\x1a\n") {
+            abort(500, 'Failed to generate PNG. Please use SVG format instead.');
+        }
+        
+        return response()->make($pngData, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length' => strlen($pngData),
+        ]);
+    }
+    
+    /**
+     * Draw SVG content directly on GD image
+     */
+    private function drawSvgOnImage($image, $svg, $size, $color)
+    {
+        // Extract viewBox or dimensions
+        preg_match('/viewBox=["\']([^"\']*)["\']/', $svg, $viewBoxMatch);
+        preg_match('/width=["\'](\d+)["\']/', $svg, $widthMatch);
+        preg_match('/height=["\'](\d+)["\']/', $svg, $heightMatch);
+        
+        $svgWidth = isset($widthMatch[1]) ? (int)$widthMatch[1] : 200;
+        $svgHeight = isset($heightMatch[1]) ? (int)$heightMatch[1] : 200;
+        
+        if (!empty($viewBoxMatch[1])) {
+            $viewBox = preg_split('/[\s,]+/', trim($viewBoxMatch[1]));
+            if (count($viewBox) >= 4) {
+                $svgWidth = (float)$viewBox[2];
+                $svgHeight = (float)$viewBox[3];
             }
+        }
+        
+        $scaleX = $size / $svgWidth;
+        $scaleY = $size / $svgHeight;
+        
+        // Parse and draw paths (QR codes use paths)
+        preg_match_all('/<path[^>]*d=["\']([^"\']*)["\'][^>]*>/', $svg, $pathMatches);
+        
+        foreach ($pathMatches[1] as $pathData) {
+            $this->drawPathAsFilled($image, $pathData, $scaleX, $scaleY, $color);
+        }
+        
+        // Parse and draw rectangles
+        preg_match_all('/<rect[^>]*>/', $svg, $rectElements);
+        foreach ($rectElements[0] as $rectElement) {
+            preg_match('/x=["\']([^"\']*)["\']/', $rectElement, $xMatch);
+            preg_match('/y=["\']([^"\']*)["\']/', $rectElement, $yMatch);
+            preg_match('/width=["\']([^"\']*)["\']/', $rectElement, $wMatch);
+            preg_match('/height=["\']([^"\']*)["\']/', $rectElement, $hMatch);
             
-            // Generate SVG first (doesn't require imagick)
-            $svg = QrCode::format('svg')
-                ->size($size)
-                ->generate($url);
-            
-            // Convert SVG to PNG
-            $pngData = $this->svgToPng($svg, $size);
-            
-            if (!$pngData || empty($pngData)) {
-                abort(500, 'Failed to generate PNG from QR code');
+            if (isset($xMatch[1]) && isset($yMatch[1]) && isset($wMatch[1]) && isset($hMatch[1])) {
+                $x = (int)((float)$xMatch[1] * $scaleX);
+                $y = (int)((float)$yMatch[1] * $scaleY);
+                $w = (int)((float)$wMatch[1] * $scaleX);
+                $h = (int)((float)$hMatch[1] * $scaleY);
+                imagefilledrectangle($image, $x, $y, $x + $w - 1, $y + $h - 1, $color);
             }
-            
-            return response($pngData, 200)
-                ->header('Content-Type', 'image/png')
-                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
-                ->header('Content-Length', strlen($pngData));
-                
-        } catch (\Exception $e) {
-            abort(500, 'Error generating PNG: ' . $e->getMessage());
         }
     }
 
@@ -169,43 +220,35 @@ class QRCodeController extends Controller
 
         $filename = 'qrcode-' . time() . '.jpg';
         
-        // Generate SVG first (doesn't require imagick)
+        // Create image directly using GD
+        $image = imagecreatetruecolor($size, $size);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 0, 0, 0);
+        imagefill($image, 0, 0, $white);
+        
+        // Generate SVG to get QR code pattern
         $svg = QrCode::format('svg')
             ->size($size)
             ->generate($url);
         
-        // Convert SVG to PNG first, then to JPG
-        $pngData = $this->svgToPng($svg, $size);
-        $image = @imagecreatefromstring($pngData);
+        // Parse SVG and draw on image
+        $this->drawSvgOnImage($image, $svg, $size, $black);
         
-        if (!$image) {
-            abort(500, 'Failed to create image from QR code');
-        }
-        
-        $jpgImage = imagecreatetruecolor(imagesx($image), imagesy($image));
-        
-        // Fill with white background
-        $white = imagecolorallocate($jpgImage, 255, 255, 255);
-        imagefill($jpgImage, 0, 0, $white);
-        
-        // Copy PNG to JPG
-        imagecopy($jpgImage, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
-        
+        // Output as JPG
         ob_start();
-        imagejpeg($jpgImage, null, 100);
+        imagejpeg($image, null, 100);
         $jpgData = ob_get_clean();
-        
         imagedestroy($image);
-        imagedestroy($jpgImage);
         
-        if (!$jpgData || empty($jpgData)) {
-            abort(500, 'Failed to generate JPG from QR code');
+        if (empty($jpgData) || strlen($jpgData) < 100) {
+            abort(500, 'Failed to generate JPG. Please use SVG format instead.');
         }
         
-        return response($jpgData, 200)
-            ->header('Content-Type', 'image/jpeg')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
-            ->header('Content-Length', strlen($jpgData));
+        return response()->make($jpgData, 200, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length' => strlen($jpgData),
+        ]);
     }
 
     /**
