@@ -365,6 +365,8 @@
             align-items: center;
             justify-content: center;
             animation: fadeIn 0.3s ease;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .modal-overlay.show {
@@ -469,6 +471,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            z-index: 1000;
         }
         
         .modal-close:hover {
@@ -488,7 +491,7 @@
             height: 300px;
             border-radius: 15px;
             overflow: hidden;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -504,7 +507,7 @@
         
         .campaign-image-placeholder {
             font-size: 4rem;
-            color: #fff;
+            color: #666;
         }
         
         .campaign-message {
@@ -541,7 +544,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: #ffffff;
             border-radius: 15px;
             border: 3px solid #F42A41;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -614,77 +617,174 @@
         }
         
         @media (max-width: 768px) {
+            .modal-overlay {
+                padding-top: 60px;
+                align-items: flex-start;
+                padding-bottom: 20px;
+                overflow-y: auto;
+            }
+            
             .modal-content {
-                padding: 30px 20px;
-                max-width: 95%;
+                padding: 40px 15px 25px 15px;
+                max-width: 90%;
+                margin-top: 0;
+                margin-bottom: 20px;
+            }
+            
+            .modal-close {
+                top: 8px;
+                right: 8px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.6rem;
+                background: rgba(0, 0, 0, 0.15);
             }
             
             .campaign-popup {
                 flex-direction: column;
-                gap: 20px;
+                gap: 15px;
             }
             
             .campaign-image,
             .rickshaw-symbol {
                 flex: 0 0 auto;
-                width: 200px;
-                height: 200px;
+                width: 150px;
+                height: 150px;
             }
             
             .campaign-subtitle {
-                font-size: 1.3rem;
-                margin-bottom: 15px;
+                font-size: 1rem;
+                margin-bottom: 10px;
             }
             
             .campaign-message h3 {
-                font-size: 2.5rem;
-                margin-bottom: 20px;
+                font-size: 1.8rem;
+                margin-bottom: 15px;
             }
             
             .campaign-message p {
-                font-size: 2.1rem;
+                font-size: 1.5rem;
             }
             
             .rickshaw-icon {
-                width: 160px;
-                height: 130px;
+                width: 120px;
+                height: 100px;
             }
             
             .campaign-image-placeholder {
-                font-size: 4rem;
+                font-size: 3rem;
             }
         }
         
         @media (max-width: 480px) {
+            .modal-overlay {
+                padding-top: 40px;
+                align-items: flex-start;
+                padding-bottom: 15px;
+                overflow-y: auto;
+            }
+            
             .modal-content {
-                padding: 25px 15px;
+                padding: 35px 12px 20px 12px;
+                max-width: 85%;
+                margin-top: 0;
+                margin-bottom: 15px;
+            }
+            
+            .modal-close {
+                top: 5px;
+                right: 5px;
+                width: 35px;
+                height: 35px;
+                font-size: 1.4rem;
+                background: rgba(0, 0, 0, 0.15);
+            }
+            
+            .campaign-popup {
+                gap: 12px;
             }
             
             .campaign-image,
             .rickshaw-symbol {
-                width: 160px;
-                height: 160px;
+                width: 120px;
+                height: 120px;
             }
             
             .campaign-subtitle {
-                font-size: 1.2rem;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
             }
             
             .campaign-message h3 {
-                font-size: 2.2rem;
+                font-size: 1.5rem;
+                margin-bottom: 12px;
             }
             
             .campaign-message p {
-                font-size: 1.9rem;
+                font-size: 1.3rem;
             }
             
             .rickshaw-icon {
-                width: 130px;
-                height: 105px;
+                width: 100px;
+                height: 80px;
             }
             
             .campaign-image-placeholder {
-                font-size: 3.5rem;
+                font-size: 2.5rem;
+            }
+        }
+        
+        /* Android-specific fixes */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .modal-overlay {
+                padding-top: max(60px, env(safe-area-inset-top, 60px));
+            }
+            
+            .modal-close {
+                top: max(10px, env(safe-area-inset-top, 10px));
+            }
+        }
+        
+        /* Ensure close button is always visible on small screens */
+        @media (max-width: 360px) {
+            .modal-overlay {
+                padding-top: 30px;
+            }
+            
+            .modal-content {
+                padding: 30px 10px 15px 10px;
+                max-width: 80%;
+            }
+            
+            .modal-close {
+                top: 3px;
+                right: 3px;
+                width: 32px;
+                height: 32px;
+                font-size: 1.3rem;
+            }
+            
+            .campaign-image,
+            .rickshaw-symbol {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .campaign-subtitle {
+                font-size: 0.85rem;
+            }
+            
+            .campaign-message h3 {
+                font-size: 1.3rem;
+            }
+            
+            .campaign-message p {
+                font-size: 1.1rem;
+            }
+            
+            .rickshaw-icon {
+                width: 85px;
+                height: 70px;
             }
         }
         
