@@ -356,17 +356,57 @@
                 
                 // Allow manual input formatting with proper backspace handling
                 let lastValue = '';
+                let lastCursorPos = 0;
+                
+                // Track keydown to know what was typed
+                let lastKeyPressed = '';
+                dateInput.addEventListener('keydown', function(e) {
+                    // Store the key that was pressed (for digits only)
+                    if (e.key.length === 1 && /[0-9]/.test(e.key)) {
+                        lastKeyPressed = e.key;
+                    } else {
+                        lastKeyPressed = '';
+                    }
+                });
+                
                 dateInput.addEventListener('input', function(e) {
                     let value = e.target.value;
                     const cursorPos = e.target.selectionStart;
                     
-                    // If backspace was pressed and we're removing a slash, handle it properly
-                    if (value.length < lastValue.length && (lastValue.endsWith('/') || value.includes('//'))) {
-                        value = value.replace(/\//g, '');
+                    // Remove all non-digits to get pure digit string
+                    let digitsOnly = value.replace(/\D/g, '');
+                    
+                    // Limit to 8 digits (ddmmyyyy)
+                    if (digitsOnly.length > 8) {
+                        digitsOnly = digitsOnly.substring(0, 8);
                     }
                     
-                    // Remove all non-digits
-                    let digitsOnly = value.replace(/\D/g, '');
+                    // Also check the previous formatted value to understand context
+                    const lastDigitsOnly = lastValue.replace(/\D/g, '');
+                    const digitsAdded = digitsOnly.length - lastDigitsOnly.length;
+                    
+                    // Detect where the new digit was inserted by comparing old and new values
+                    // If user was typing after a slash, we need to ensure cursor is placed correctly
+                    let digitsBeforeCursor = value.substring(0, cursorPos).replace(/\D/g, '').length;
+                    
+                    // If a digit was added and we had a previous value, check if user was after a slash
+                    if (digitsAdded > 0 && lastValue) {
+                        const lastFormatted = lastValue;
+                        const lastCursorWasAfterSlash = lastCursorPos > 0 && lastFormatted.charAt(lastCursorPos - 1) === '/';
+                        
+                        // If user was typing after a slash, ensure digitsBeforeCursor reflects month/year section
+                        if (lastCursorWasAfterSlash) {
+                            const lastDigitsBefore = lastFormatted.substring(0, lastCursorPos).replace(/\D/g, '').length;
+                            // User was in month or year section, so new digit should be in that section
+                            if (lastDigitsBefore >= 2 && lastDigitsBefore < 4) {
+                                // Was in month section, new digit is month digit
+                                digitsBeforeCursor = lastDigitsBefore + 1;
+                            } else if (lastDigitsBefore >= 4) {
+                                // Was in year section, new digit is year digit
+                                digitsBeforeCursor = lastDigitsBefore + 1;
+                            }
+                        }
+                    }
                     
                     // Format as dd/mm/yyyy
                     let formatted = '';
@@ -380,15 +420,115 @@
                         }
                     }
                     
+                    // Calculate new cursor position
+                    // Use the digit count to determine which section we're in
+                    let newCursorPos = 0;
+                    
+                    // Use lastValue to determine where user was typing
+                    if (lastValue && digitsAdded > 0) {
+                        // User added a digit, check where they were typing
+                        const lastDigitsBefore = lastValue.substring(0, lastCursorPos).replace(/\D/g, '').length;
+                        const wasAfterFirstSlash = lastCursorPos > 0 && lastValue.charAt(lastCursorPos - 1) === '/' && lastDigitsBefore === 2;
+                        const wasAfterSecondSlash = lastCursorPos > 0 && lastValue.charAt(lastCursorPos - 1) === '/' && lastDigitsBefore === 4;
+                        
+                        if (wasAfterFirstSlash || (lastDigitsBefore >= 2 && lastDigitsBefore < 4)) {
+                            // User is typing in month section
+                            const firstSlashPos = formatted.indexOf('/');
+                            if (firstSlashPos !== -1) {
+                                newCursorPos = firstSlashPos + 1; // After "/"
+                                const monthDigits = digitsBeforeCursor - 2;
+                                if (monthDigits > 0) {
+                                    newCursorPos += monthDigits;
+                                }
+                                // Ensure we're after the slash
+                                if (newCursorPos <= firstSlashPos) {
+                                    newCursorPos = firstSlashPos + 1;
+                                }
+                            }
+                        } else if (wasAfterSecondSlash || lastDigitsBefore >= 4) {
+                            // User is typing in year section
+                            const secondSlashPos = formatted.lastIndexOf('/');
+                            if (secondSlashPos !== -1) {
+                                newCursorPos = secondSlashPos + 1; // After "/"
+                                const yearDigits = digitsBeforeCursor - 4;
+                                if (yearDigits > 0) {
+                                    newCursorPos += yearDigits;
+                                }
+                                // Ensure we're after the slash
+                                if (newCursorPos <= secondSlashPos) {
+                                    newCursorPos = secondSlashPos + 1;
+                                }
+                            }
+                        } else {
+                            // Day section
+                            newCursorPos = digitsBeforeCursor;
+                            if (digitsBeforeCursor === 2 && digitsOnly.length >= 2) {
+                                newCursorPos = 3; // After "dd/"
+                            }
+                        }
+                    } else {
+                        // Normal calculation based on digit count
+                        if (digitsBeforeCursor <= 2) {
+                            // Day section
+                            newCursorPos = digitsBeforeCursor;
+                            if (digitsBeforeCursor === 2 && digitsOnly.length >= 2) {
+                                newCursorPos = 3; // After "dd/"
+                            }
+                        } else if (digitsBeforeCursor <= 4) {
+                            // Month section
+                            const firstSlashPos = formatted.indexOf('/');
+                            if (firstSlashPos !== -1) {
+                                newCursorPos = firstSlashPos + 1; // After "/"
+                                const monthDigits = digitsBeforeCursor - 2;
+                                newCursorPos += monthDigits;
+                                // Ensure we're after the slash
+                                if (newCursorPos <= firstSlashPos) {
+                                    newCursorPos = firstSlashPos + 1;
+                                }
+                                if (digitsBeforeCursor === 4 && digitsOnly.length >= 4) {
+                                    newCursorPos = 6; // After "dd/mm/"
+                                }
+                            }
+                        } else {
+                            // Year section
+                            const secondSlashPos = formatted.lastIndexOf('/');
+                            if (secondSlashPos !== -1) {
+                                newCursorPos = secondSlashPos + 1; // After "/"
+                                const yearDigits = digitsBeforeCursor - 4;
+                                newCursorPos += yearDigits;
+                                // Ensure we're after the slash
+                                if (newCursorPos <= secondSlashPos) {
+                                    newCursorPos = secondSlashPos + 1;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Auto-advance past slash when user completes a section
+                    if (newCursorPos < formatted.length && formatted[newCursorPos] === '/') {
+                        if (digitsBeforeCursor === 2 && digitsOnly.length === 2) {
+                            newCursorPos++;
+                        } else if (digitsBeforeCursor === 4 && digitsOnly.length === 4) {
+                            newCursorPos++;
+                        }
+                    }
+                    
+                    // Ensure cursor is within bounds
+                    if (newCursorPos > formatted.length) {
+                        newCursorPos = formatted.length;
+                    }
+                    if (newCursorPos < 0) {
+                        newCursorPos = 0;
+                    }
+                    
                     e.target.value = formatted;
                     lastValue = formatted;
+                    lastCursorPos = newCursorPos;
                     
                     // Restore cursor position
-                    let newCursorPos = cursorPos;
-                    if (formatted.length > lastValue.length && formatted.charAt(cursorPos - 1) === '/') {
-                        newCursorPos = cursorPos + 1;
-                    }
-                    e.target.setSelectionRange(newCursorPos, newCursorPos);
+                    setTimeout(function() {
+                        e.target.setSelectionRange(newCursorPos, newCursorPos);
+                    }, 0);
                     
                     toggleClearIcon();
                 });
