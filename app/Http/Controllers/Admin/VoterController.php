@@ -137,7 +137,17 @@ class VoterController extends Controller
     {
         $request->validate([
             'csv_file' => 'required|file|mimes:csv,txt|max:10240', // 10MB max
+            'polling_center_name' => 'required|string|max:255',
+            'ward_number' => 'required|string|max:255',
+            'voter_area_number' => 'required|string|max:255',
         ]);
+
+        // Get the 3 common fields that will apply to all voters
+        $commonFields = [
+            'polling_center_name' => $request->input('polling_center_name'),
+            'ward_number' => $request->input('ward_number'),
+            'voter_area_number' => $request->input('voter_area_number'),
+        ];
 
         $file = $request->file('csv_file');
         $path = $file->getRealPath();
@@ -147,11 +157,10 @@ class VoterController extends Controller
         // Remove header row
         $header = array_shift($data);
         
-        // Expected columns (in order)
+        // Expected columns (in order) - removed polling_center_name, ward_number, voter_area_number
         $expectedColumns = [
             'name', 'voter_number', 'father_name', 'mother_name', 
-            'occupation', 'address', 'polling_center_name', 'ward_number', 
-            'voter_area_number', 'voter_serial_number', 'date_of_birth'
+            'occupation', 'address', 'voter_serial_number', 'date_of_birth'
         ];
         
         $results = [
@@ -247,6 +256,9 @@ class VoterController extends Controller
                     $voterData['date_of_birth'] = null;
                 }
                 
+                // Apply common fields to all voters
+                $voterData = array_merge($voterData, $commonFields);
+                
                 // Create voter
                 try {
                     Voter::create($voterData);
@@ -290,7 +302,7 @@ class VoterController extends Controller
             // Add BOM for UTF-8 (helps with Excel)
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             
-            // Header row
+            // Header row (removed polling_center_name, ward_number, voter_area_number - these are entered in the form)
             fputcsv($file, [
                 'Name (নাম)',
                 'Voter Number (ভোটার নম্বর)',
@@ -298,15 +310,13 @@ class VoterController extends Controller
                 'Mother Name (মাতা)',
                 'Occupation (পেশা)',
                 'Address (ঠিকানা)',
-                'Polling Center Name (ভোট কেন্দ্রের নাম)',
-                'Ward Number (ওয়ার্ড নম্বর)',
-                'Voter Area Number (ভোটার এলাকার নম্বর)',
                 'Voter Serial Number (ভোটার সিরিয়াল নম্বর)',
                 'Date of Birth (জন্ম তারিখ)'
             ]);
             
-            // Sample row - prefix voter number and ward number with single quote to force text format
+            // Sample row - prefix voter number with single quote to force text format
             // Single quote prefix forces Excel to treat as text (won't show in cell)
+            // Note: ভোট কেন্দ্র, ওয়ার্ড নম্বর, and ভোটার এলাকার নম্বর are entered in the upload form, not in CSV
             fputcsv($file, [
                 'আহমেদ হাসান',
                 "'V-001234",  // Single quote prefix forces Excel to treat as text
@@ -314,9 +324,6 @@ class VoterController extends Controller
                 'ফাতেমা খাতুন',
                 'ব্যবসায়ী',
                 'ঢাকা, বাংলাদেশ',
-                'ঢাকা কলেজ',
-                "'১০",  // Single quote prefix for ward number
-                "'১০১",  // Single quote prefix for voter area number
                 "'১২৩৪",  // Single quote prefix for voter serial number
                 '1990-01-15'
             ]);

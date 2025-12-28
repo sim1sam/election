@@ -217,9 +217,11 @@
                             <strong>Instructions:</strong>
                             <ul class="mb-0 mt-2">
                                 <li>Download the CSV template first to see the correct format</li>
-                                <li>Required columns: Name, Voter Number</li>
-                                <li>Optional columns: Father Name, Mother Name, Occupation, Address, Polling Center Name, Ward Number, <strong>Voter Area Number (ভোটার এলাকার নম্বর)</strong>, <strong>Voter Serial Number (ভোটার সিরিয়াল নম্বর)</strong>, Date of Birth</li>
-                                <li><strong>Important:</strong> If your voter number, ward number, voter area number, or voter serial number starts with 0 or has leading zeros, prefix it with a single quote (') in Excel to preserve the zeros. Example: '001234 or '261000000000</li>
+                                <li>Fill in the 3 common fields below - these will apply to ALL voters in the CSV</li>
+                                <li>Required columns in CSV: Name, Voter Number</li>
+                                <li>Optional columns in CSV: Father Name, Mother Name, Occupation, Address, <strong>Voter Serial Number (ভোটার সিরিয়াল নম্বর)</strong>, Date of Birth</li>
+                                <li><strong>Note:</strong> ভোট কেন্দ্র, ওয়ার্ড নম্বর, and ভোটার এলাকার নম্বর are NOT in CSV - enter them below</li>
+                                <li><strong>Important:</strong> If your voter number or voter serial number starts with 0 or has leading zeros, prefix it with a single quote (') in Excel to preserve the zeros. Example: '001234 or '261000000000</li>
                                 <li>Date format: YYYY-MM-DD, DD/MM/YYYY, M/D/YYYY, or DD-MM-YYYY (e.g., 1990-01-15, 15/01/1990, 1/15/1990)</li>
                                 <li>Voter numbers must be unique</li>
                                 <li>Maximum file size: 10MB</li>
@@ -227,7 +229,42 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="csv_file">Select CSV File</label>
+                            <label for="polling_center_name">ভোট কেন্দ্র <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('polling_center_name') is-invalid @enderror" 
+                                   id="polling_center_name" name="polling_center_name" 
+                                   value="{{ old('polling_center_name') }}" required>
+                            @error('polling_center_name')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">This value will be applied to all voters in the CSV</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ward_number">ওয়ার্ড নম্বর <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('ward_number') is-invalid @enderror" 
+                                   id="ward_number" name="ward_number" 
+                                   value="{{ old('ward_number') }}" required>
+                            @error('ward_number')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">This value will be applied to all voters in the CSV</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="voter_area_number">ভোটার এলাকার নম্বর <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('voter_area_number') is-invalid @enderror" 
+                                   id="voter_area_number" name="voter_area_number" 
+                                   value="{{ old('voter_area_number') }}" required>
+                            @error('voter_area_number')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                            <small class="form-text text-muted">This value will be applied to all voters in the CSV</small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="form-group">
+                            <label for="csv_file">Select CSV File <span class="text-danger">*</span></label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input @error('csv_file') is-invalid @enderror" 
                                        id="csv_file" name="csv_file" accept=".csv,.txt" required>
