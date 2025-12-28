@@ -364,10 +364,16 @@
     </style>
 </head>
 <body>
+    @php
+        // Ensure variables exist with fallbacks
+        $voters = $voters ?? collect([]);
+        $settings = $settings ?? \App\Models\HomePageSetting::getSettings();
+    @endphp
+    
     <div class="container">
         <div class="header">
             <h1>{{ $settings->post_countdown_title ?? 'ভোটার তথ্য খুঁজুন' }}</h1>
-            @if($settings->post_countdown_subtitle)
+            @if(isset($settings->post_countdown_subtitle) && $settings->post_countdown_subtitle)
             <p style="margin-top: 10px; opacity: 0.9;">{{ $settings->post_countdown_subtitle }}</p>
             @endif
         </div>
@@ -380,7 +386,7 @@
         
         <div class="results-header">
             <div class="results-count">
-                @if($voters->count() > 0)
+                @if($voters && $voters->count() > 0)
                     মোট {{ $voters->count() }} জন ভোটার পাওয়া গেছে
                 @else
                     কোন ভোটার পাওয়া যায়নি
@@ -388,7 +394,7 @@
             </div>
         </div>
         
-        @if($voters->count() > 0)
+        @if($voters && $voters->count() > 0)
             <div class="voters-grid">
                 @foreach($voters as $voter)
                     <div class="voter-card">
@@ -438,7 +444,13 @@
                             @if($voter->date_of_birth)
                             <div class="detail-item">
                                 <span class="detail-label">জন্ম তারিখ:</span>
-                                <span class="detail-value">{{ $voter->date_of_birth->format('d/m/Y') }}</span>
+                                <span class="detail-value">
+                                    @if($voter->date_of_birth instanceof \Carbon\Carbon)
+                                        {{ $voter->date_of_birth->format('d/m/Y') }}
+                                    @else
+                                        {{ \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y') }}
+                                    @endif
+                                </span>
                             </div>
                             @endif
                             
@@ -511,7 +523,13 @@
                             @if($voter->date_of_birth)
                             <div class="detail-item">
                                 <span class="detail-label">জন্ম তারিখ:</span>
-                                <span class="detail-value">{{ $voter->date_of_birth->format('d/m/Y') }}</span>
+                                <span class="detail-value">
+                                    @if($voter->date_of_birth instanceof \Carbon\Carbon)
+                                        {{ $voter->date_of_birth->format('d/m/Y') }}
+                                    @else
+                                        {{ \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y') }}
+                                    @endif
+                                </span>
                             </div>
                             @endif
                             
