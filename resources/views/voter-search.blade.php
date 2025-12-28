@@ -38,6 +38,55 @@
             border-radius: 15px;
             margin-bottom: 30px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            min-height: 50px;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            color: #fff !important;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .home-button i {
+            display: block;
+            line-height: 1;
+            font-size: 1.5rem;
+        }
+        
+        .home-button .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
         
         .header h1 {
@@ -206,6 +255,14 @@
                 margin-bottom: 20px;
             }
             
+            .home-button {
+                top: 15px;
+                left: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+            
             .header h1 {
                 font-size: 1.8rem;
             }
@@ -276,6 +333,14 @@
         }
         
         @media (max-width: 480px) {
+            .home-button {
+                top: 10px;
+                left: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
             .header h1 {
                 font-size: 1.5rem;
             }
@@ -630,6 +695,10 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="{{ url('/') }}" class="home-button" title="হোম পেজে যান">
+                <i class="fas fa-home" aria-hidden="true"></i>
+                <span class="sr-only">হোম</span>
+            </a>
             <h1>{{ $settings->post_countdown_title ?? 'ভোটার তথ্য খুঁজুন' }}</h1>
             @if($settings->post_countdown_subtitle)
             <p class="search-subtitle">{{ $settings->post_countdown_subtitle }}</p>
