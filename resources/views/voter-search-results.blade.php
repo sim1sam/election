@@ -413,12 +413,12 @@
                             </div>
                             @endif
                             
-                            @if($voter->mother_name)
+                            {{-- @if($voter->mother_name)
                             <div class="detail-item">
                                 <span class="detail-label">মাতা:</span>
                                 <span class="detail-value">{{ $voter->mother_name }}</span>
                             </div>
-                            @endif
+                            @endif --}}
                             
                             @if($voter->ward_number)
                             <div class="detail-item">
@@ -455,7 +455,7 @@
                             </div>
                             @endif
                             
-                            @if($voter->polling_center_name)
+                            {{-- @if($voter->polling_center_name)
                             <div class="detail-item">
                                 <span class="detail-label">ভোট কেন্দ্র:</span>
                                 <span class="detail-value">{{ $voter->polling_center_name }}</span>
@@ -467,7 +467,7 @@
                                 <span class="detail-label">ঠিকানা:</span>
                                 <span class="detail-value">{{ Str::limit($voter->address, 50) }}</span>
                             </div>
-                            @endif
+                            @endif --}}
                         </div>
                         
                         <button class="btn-view-all" onclick="showFullDetails(this, {{ $voter->id }})">
