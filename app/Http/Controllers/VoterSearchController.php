@@ -6,6 +6,8 @@ use App\Models\Voter;
 use App\Models\HomePageSetting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\NumberConverter;
 
 class VoterSearchController extends Controller
 {
@@ -58,46 +60,94 @@ class VoterSearchController extends Controller
 
         $query = Voter::query();
 
-        // Search by ward number
+        // Search by ward number (convert Bangla to English, use exact match)
         if ($request->filled('ward_number')) {
-            $query->where('ward_number', 'like', '%' . $request->ward_number . '%');
+            $wardNumber = NumberConverter::banglaToEnglish(trim($request->ward_number));
+            // Use exact match instead of LIKE for better accuracy
+            $query->where('ward_number', $wardNumber);
         }
 
-        // Search by date of birth
+        // Search by date of birth (convert Bangla to English)
         if ($request->filled('date_of_birth')) {
             try {
-                $dateValue = trim($request->date_of_birth);
+                $dateValue = NumberConverter::convertDateToEnglish(trim($request->date_of_birth));
                 $searchDate = null;
                 
-                // Try multiple date formats in order of preference
-                $formats = [
-                    'd/m/Y',      // dd/mm/yyyy (preferred format)
-                    'd-m-Y',      // dd-mm-yyyy
-                    'Y-m-d',      // yyyy-mm-dd (ISO format)
-                    'm/d/Y',      // mm/dd/yyyy (US format)
-                ];
-                
-                foreach ($formats as $format) {
-                    try {
-                        $parsedDate = Carbon::createFromFormat($format, $dateValue);
-                        if ($parsedDate) {
-                            $searchDate = $parsedDate->format('Y-m-d');
-                            break;
+                // Parse date - prioritize dd/mm/yyyy format (Bangladesh format)
+                if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dateValue, $matches)) {
+                    $first = (int)$matches[1];
+                    $second = (int)$matches[2];
+                    $year = (int)$matches[3];
+                    
+                    // If first part > 12, it must be dd/mm/yyyy format
+                    if ($first > 12) {
+                        // Definitely dd/mm/yyyy format
+                        $day = $first;
+                        $month = $second;
+                        $parsedDate = Carbon::create($year, $month, $day);
+                    } elseif ($second > 12) {
+                        // Definitely mm/dd/yyyy format
+                        $month = $first;
+                        $day = $second;
+                        $parsedDate = Carbon::create($year, $month, $day);
+                    } else {
+                        // Ambiguous: both parts <= 12
+                        // Prioritize dd/mm/yyyy (Bangladesh format) over mm/dd/yyyy (US format)
+                        try {
+                            // Try as dd/mm/yyyy first
+                            $day = $first;
+                            $month = $second;
+                            $parsedDate = Carbon::create($year, $month, $day);
+                        } catch (\Exception $e) {
+                            // If invalid (e.g., Feb 30), try as mm/dd/yyyy
+                            $month = $first;
+                            $day = $second;
+                            $parsedDate = Carbon::create($year, $month, $day);
                         }
-                    } catch (\Exception $e) {
-                        // Try next format
-                        continue;
+                    }
+                    $searchDate = $parsedDate->format('Y-m-d');
+                } else {
+                    // Try standard date formats
+                    $formats = [
+                        'd/m/Y',      // dd/mm/yyyy (preferred format)
+                        'd-m-Y',      // dd-mm-yyyy
+                        'Y-m-d',      // yyyy-mm-dd (ISO format)
+                        'm/d/Y',      // mm/dd/yyyy (US format)
+                    ];
+                    
+                    foreach ($formats as $format) {
+                        try {
+                            $parsedDate = Carbon::createFromFormat($format, $dateValue);
+                            if ($parsedDate !== false) {
+                                // Verify the format matches by reformatting
+                                if ($parsedDate->format($format) === $dateValue) {
+                                    $searchDate = $parsedDate->format('Y-m-d');
+                                    break;
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            continue;
+                        }
+                    }
+                    
+                    // If no format matched, try Carbon's parse (less reliable)
+                    if (!$searchDate) {
+                        $parsedDate = Carbon::parse($dateValue);
+                        $searchDate = $parsedDate->format('Y-m-d');
                     }
                 }
                 
-                // If no format matched, try Carbon's parse (more flexible)
-                if (!$searchDate) {
-                    $searchDate = Carbon::parse($dateValue)->format('Y-m-d');
+                if ($searchDate) {
+                    // Use whereDate for exact date match
+                    $query->whereDate('date_of_birth', $searchDate);
                 }
-                
-                $query->whereDate('date_of_birth', $searchDate);
             } catch (\Exception $e) {
                 // Invalid date format, skip this filter
+                // Log error for debugging
+                Log::warning('Date parsing error in voter search: ' . $e->getMessage(), [
+                    'date_value' => $request->date_of_birth,
+                    'converted_value' => $dateValue ?? null
+                ]);
             }
         }
 

@@ -387,7 +387,7 @@
         <div class="results-header">
             <div class="results-count">
                 @if($voters && $voters->count() > 0)
-                    মোট {{ $voters->count() }} জন ভোটার পাওয়া গেছে
+                    মোট {{ \App\Helpers\NumberConverter::englishToBangla($voters->count()) }} জন ভোটার পাওয়া গেছে
                 @else
                     কোন ভোটার পাওয়া যায়নি
                 @endif
@@ -401,7 +401,7 @@
                         <div class="voter-card-header">
                             <div class="voter-name">{{ $voter->name }}</div>
                             <div class="voter-number">
-                                <span class="voter-number-label">ভোটার নম্বর:</span> {{ $voter->voter_number }}
+                                <span class="voter-number-label">ভোটার নম্বর:</span> {{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_number) }}
                             </div>
                         </div>
                         
@@ -423,21 +423,21 @@
                             @if($voter->ward_number)
                             <div class="detail-item">
                                 <span class="detail-label">ওয়ার্ড নম্বর:</span>
-                                <span class="detail-value">{{ $voter->ward_number }}</span>
+                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->ward_number) }}</span>
                             </div>
                             @endif
                             
                             @if($voter->voter_area_number)
                             <div class="detail-item">
                                 <span class="detail-label">ভোটার এলাকার নম্বর:</span>
-                                <span class="detail-value">{{ $voter->voter_area_number }}</span>
+                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_area_number) }}</span>
                             </div>
                             @endif
                             
                             @if($voter->voter_serial_number)
                             <div class="detail-item">
                                 <span class="detail-label">ভোটার সিরিয়াল নম্বর:</span>
-                                <span class="detail-value">{{ $voter->voter_serial_number }}</span>
+                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_serial_number) }}</span>
                             </div>
                             @endif
                             
@@ -445,11 +445,12 @@
                             <div class="detail-item">
                                 <span class="detail-label">জন্ম তারিখ:</span>
                                 <span class="detail-value">
-                                    @if($voter->date_of_birth instanceof \Carbon\Carbon)
-                                        {{ $voter->date_of_birth->format('d/m/Y') }}
-                                    @else
-                                        {{ \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y') }}
-                                    @endif
+                                    @php
+                                        $dateStr = $voter->date_of_birth instanceof \Carbon\Carbon 
+                                            ? $voter->date_of_birth->format('d/m/Y') 
+                                            : \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y');
+                                    @endphp
+                                    {{ \App\Helpers\NumberConverter::englishToBangla($dateStr) }}
                                 </span>
                             </div>
                             @endif
@@ -502,21 +503,21 @@
                             @if($voter->ward_number)
                             <div class="detail-item">
                                 <span class="detail-label">ওয়ার্ড নম্বর:</span>
-                                <span class="detail-value">{{ $voter->ward_number }}</span>
+                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->ward_number) }}</span>
                             </div>
                             @endif
                             
                             @if($voter->voter_area_number)
                             <div class="detail-item">
                                 <span class="detail-label">ভোটার এলাকার নম্বর:</span>
-                                <span class="detail-value">{{ $voter->voter_area_number }}</span>
+                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_area_number) }}</span>
                             </div>
                             @endif
                             
                             @if($voter->voter_serial_number)
                             <div class="detail-item">
                                 <span class="detail-label">ভোটার সিরিয়াল নম্বর:</span>
-                                <span class="detail-value">{{ $voter->voter_serial_number }}</span>
+                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_serial_number) }}</span>
                             </div>
                             @endif
                             
@@ -524,11 +525,12 @@
                             <div class="detail-item">
                                 <span class="detail-label">জন্ম তারিখ:</span>
                                 <span class="detail-value">
-                                    @if($voter->date_of_birth instanceof \Carbon\Carbon)
-                                        {{ $voter->date_of_birth->format('d/m/Y') }}
-                                    @else
-                                        {{ \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y') }}
-                                    @endif
+                                    @php
+                                        $dateStr = $voter->date_of_birth instanceof \Carbon\Carbon 
+                                            ? $voter->date_of_birth->format('d/m/Y') 
+                                            : \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y');
+                                    @endphp
+                                    {{ \App\Helpers\NumberConverter::englishToBangla($dateStr) }}
                                 </span>
                             </div>
                             @endif

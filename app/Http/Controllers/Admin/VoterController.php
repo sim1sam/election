@@ -7,6 +7,8 @@ use App\Models\Voter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\NumberConverter;
 
 class VoterController extends Controller
 {
@@ -17,19 +19,22 @@ class VoterController extends Controller
     {
         $query = Voter::query();
 
-        // Search by voter number
+        // Search by voter number (convert Bangla to English)
         if ($request->filled('voter_number')) {
-            $query->where('voter_number', 'like', '%' . $request->voter_number . '%');
+            $voterNumber = NumberConverter::banglaToEnglish($request->voter_number);
+            $query->where('voter_number', 'like', '%' . $voterNumber . '%');
         }
 
-        // Search by ward number
+        // Search by ward number (convert Bangla to English)
         if ($request->filled('ward_number')) {
-            $query->where('ward_number', 'like', '%' . $request->ward_number . '%');
+            $wardNumber = NumberConverter::banglaToEnglish($request->ward_number);
+            $query->where('ward_number', 'like', '%' . $wardNumber . '%');
         }
 
-        // Search by voter serial number
+        // Search by voter serial number (convert Bangla to English)
         if ($request->filled('voter_serial_number')) {
-            $query->where('voter_serial_number', 'like', '%' . $request->voter_serial_number . '%');
+            $voterSerialNumber = NumberConverter::banglaToEnglish($request->voter_serial_number);
+            $query->where('voter_serial_number', 'like', '%' . $voterSerialNumber . '%');
         }
 
         $voters = $query->orderBy('id', 'asc')->paginate(20)->withQueryString();
@@ -63,6 +68,23 @@ class VoterController extends Controller
             'voter_serial_number' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
         ]);
+
+        // Convert Bangla digits to English before storing
+        if (isset($validated['voter_number'])) {
+            $validated['voter_number'] = NumberConverter::banglaToEnglish($validated['voter_number']);
+        }
+        if (isset($validated['voter_serial_number'])) {
+            $validated['voter_serial_number'] = NumberConverter::banglaToEnglish($validated['voter_serial_number']);
+        }
+        if (isset($validated['ward_number'])) {
+            $validated['ward_number'] = NumberConverter::banglaToEnglish($validated['ward_number']);
+        }
+        if (isset($validated['voter_area_number'])) {
+            $validated['voter_area_number'] = NumberConverter::banglaToEnglish($validated['voter_area_number']);
+        }
+        if (isset($validated['date_of_birth'])) {
+            $validated['date_of_birth'] = NumberConverter::convertDateToEnglish($validated['date_of_birth']);
+        }
 
         Voter::create($validated);
 
@@ -105,6 +127,23 @@ class VoterController extends Controller
             'date_of_birth' => 'nullable|date',
         ]);
 
+        // Convert Bangla digits to English before storing
+        if (isset($validated['voter_number'])) {
+            $validated['voter_number'] = NumberConverter::banglaToEnglish($validated['voter_number']);
+        }
+        if (isset($validated['voter_serial_number'])) {
+            $validated['voter_serial_number'] = NumberConverter::banglaToEnglish($validated['voter_serial_number']);
+        }
+        if (isset($validated['ward_number'])) {
+            $validated['ward_number'] = NumberConverter::banglaToEnglish($validated['ward_number']);
+        }
+        if (isset($validated['voter_area_number'])) {
+            $validated['voter_area_number'] = NumberConverter::banglaToEnglish($validated['voter_area_number']);
+        }
+        if (isset($validated['date_of_birth'])) {
+            $validated['date_of_birth'] = NumberConverter::convertDateToEnglish($validated['date_of_birth']);
+        }
+
         $voter->update($validated);
 
         return redirect()->route('admin.voters.index')
@@ -143,10 +182,11 @@ class VoterController extends Controller
         ]);
 
         // Get the 3 common fields that will apply to all voters
+        // Convert Bangla digits to English
         $commonFields = [
             'polling_center_name' => $request->input('polling_center_name'),
-            'ward_number' => $request->input('ward_number'),
-            'voter_area_number' => $request->input('voter_area_number'),
+            'ward_number' => NumberConverter::banglaToEnglish($request->input('ward_number')),
+            'voter_area_number' => NumberConverter::banglaToEnglish($request->input('voter_area_number')),
         ];
 
         $file = $request->file('csv_file');
@@ -189,6 +229,13 @@ class VoterController extends Controller
                     // Excel adds single quote to preserve leading zeros
                     if ($value !== null) {
                         $value = ltrim($value, "'\t");
+                        
+                        // Convert Bangla digits to English for numeric fields
+                        if (in_array($column, ['voter_number', 'voter_serial_number'])) {
+                            $value = NumberConverter::banglaToEnglish($value);
+                        } elseif ($column === 'date_of_birth') {
+                            $value = NumberConverter::convertDateToEnglish($value);
+                        }
                     }
                     
                     $voterData[$column] = $value;
@@ -219,37 +266,110 @@ class VoterController extends Controller
                         $dateValue = trim($voterData['date_of_birth']);
                         $date = null;
                         
-                        // Try multiple date formats in order of preference
-                        $formats = [
-                            'Y-m-d',      // 1990-01-15
-                            'd/m/Y',      // 15/01/1990
-                            'd-m-Y',      // 15-01-1990
-                            'm/d/Y',      // 01/15/1990 (US format with leading zeros)
-                            'n/j/Y',      // 1/15/1990 (US format without leading zeros)
-                            'Y/m/d',      // 1990/01/15
-                        ];
-                        
-                        foreach ($formats as $format) {
-                            try {
-                                $parsedDate = \Carbon\Carbon::createFromFormat($format, $dateValue);
-                                if ($parsedDate) {
-                                    $date = $parsedDate;
-                                    break;
+                        // Check if it's an Excel serial date (numeric value like 33603)
+                        // Excel serial dates: 1 = 1900-01-01, but Excel incorrectly treats 1900 as leap year
+                        // So we need to subtract 2 days from the calculation
+                        if (is_numeric($dateValue) && (float)$dateValue > 1 && (float)$dateValue < 1000000 && !preg_match('/[\/\-]/', $dateValue)) {
+                            // Convert Excel serial date to actual date
+                            // Excel epoch starts at 1900-01-01 (day 1)
+                            // But Excel incorrectly treats 1900 as a leap year, so we adjust
+                            $excelEpoch = \Carbon\Carbon::create(1899, 12, 30, 0, 0, 0);
+                            $days = (int)$dateValue;
+                            $date = $excelEpoch->copy()->addDays($days - 1); // Subtract 1 because Excel day 1 = 1900-01-01
+                        } else {
+                            // Handle date strings - prioritize Bangladesh format (dd/mm/yyyy)
+                            
+                            // First, try to parse as dd/mm/yyyy (Bangladesh format - PRIORITY)
+                            if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dateValue, $matches)) {
+                                $first = (int)$matches[1];
+                                $second = (int)$matches[2];
+                                $year = (int)$matches[3];
+                                
+                                // If first part > 12, it must be dd/mm/yyyy (day cannot be > 31, but month can't be > 12)
+                                if ($first > 12) {
+                                    // Definitely dd/mm/yyyy format
+                                    $day = $first;
+                                    $month = $second;
+                                    $date = \Carbon\Carbon::create($year, $month, $day);
+                                } elseif ($second > 12) {
+                                    // Definitely mm/dd/yyyy format (second part is day > 12)
+                                    $month = $first;
+                                    $day = $second;
+                                    $date = \Carbon\Carbon::create($year, $month, $day);
+                                } else {
+                                    // Ambiguous: both parts <= 12
+                                    // Prioritize dd/mm/yyyy (Bangladesh format) over mm/dd/yyyy (US format)
+                                    try {
+                                        // Try as dd/mm/yyyy first
+                                        $day = $first;
+                                        $month = $second;
+                                        $date = \Carbon\Carbon::create($year, $month, $day);
+                                    } catch (\Exception $e) {
+                                        // If invalid (e.g., Feb 30), try as mm/dd/yyyy
+                                        $month = $first;
+                                        $day = $second;
+                                        $date = \Carbon\Carbon::create($year, $month, $day);
+                                    }
                                 }
-                            } catch (\Exception $e) {
-                                // Try next format
-                                continue;
+                            } else {
+                                // Try standard date formats
+                                $formats = [
+                                    'd/m/Y',      // 01/03/1992 (dd/mm/yyyy - Bangladesh format)
+                                    'd-m-Y',      // 01-03-1992 (dd-mm-yyyy)
+                                    'Y-m-d',      // 1992-01-03 (ISO format)
+                                    'Y/m/d',      // 1992/01/03
+                                    'm/d/Y',      // 01/03/1992 (mm/dd/yyyy - US format)
+                                    'n/j/Y',      // 1/3/1992 (m/d/yyyy - US format without leading zeros)
+                                ];
+                                
+                                foreach ($formats as $format) {
+                                    try {
+                                        $parsedDate = \Carbon\Carbon::createFromFormat($format, $dateValue);
+                                        if ($parsedDate !== false) {
+                                            // Verify the format matches by reformatting
+                                            if ($parsedDate->format($format) === $dateValue) {
+                                                $date = $parsedDate;
+                                                break;
+                                            }
+                                        }
+                                    } catch (\Exception $e) {
+                                        continue;
+                                    }
+                                }
+                                
+                                // Last resort: use Carbon's parse (less reliable)
+                                if (!$date) {
+                                    $date = \Carbon\Carbon::parse($dateValue);
+                                }
                             }
                         }
                         
-                        // If no format matched, try Carbon's parse (more flexible)
+                        // Validate date is reasonable
                         if (!$date) {
-                            $date = \Carbon\Carbon::parse($dateValue);
+                            throw new \Exception("Could not parse date: {$dateValue}");
                         }
                         
-                        $voterData['date_of_birth'] = $date->format('Y-m-d');
+                        if ($date->isFuture()) {
+                            throw new \Exception("Date cannot be in the future: {$dateValue}");
+                        }
+                        
+                        if ($date->year < 1900 || $date->year > 2100) {
+                            throw new \Exception("Date year seems invalid: {$dateValue}");
+                        }
+                        
+                        // Store the date in Y-m-d format
+                        $storedDate = $date->format('Y-m-d');
+                        
+                        // Log for debugging (can be removed in production)
+                        Log::info('Date parsed in CSV import', [
+                            'original' => $dateValue,
+                            'parsed' => $storedDate,
+                            'row' => $rowNumber
+                        ]);
+                        
+                        $voterData['date_of_birth'] = $storedDate;
                     } catch (\Exception $e) {
-                        $results['errors'][] = "Row {$rowNumber}: Invalid date format for date_of_birth '{$voterData['date_of_birth']}'. Supported formats: YYYY-MM-DD, DD/MM/YYYY, M/D/YYYY, or DD-MM-YYYY.";
+                        $results['errors'][] = "Row {$rowNumber}: Invalid date format for date_of_birth '{$voterData['date_of_birth']}'. Error: " . $e->getMessage() . ". Expected format: DD/MM/YYYY (e.g., 01/03/1992 for 1st March 1992).";
                         continue;
                     }
                 } else {
