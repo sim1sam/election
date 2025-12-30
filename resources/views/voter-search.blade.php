@@ -774,7 +774,23 @@
     
     <!-- Search form handler - use server when online, cache when offline -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Lazy load voter data when search page is accessed (only if online and not already loaded)
+            if (typeof pwaHelper !== 'undefined' && typeof voterDB !== 'undefined' && navigator.onLine) {
+                try {
+                    const isLoaded = await voterDB.isDataLoaded();
+                    if (!isLoaded) {
+                        console.log('[PWA] Lazy loading voter data on search page...');
+                        // Load data in background without blocking the page
+                        pwaHelper.loadAllVoterData().catch(err => {
+                            console.error('[PWA] Error loading voter data:', err);
+                        });
+                    }
+                } catch (error) {
+                    console.error('[PWA] Error checking data load status:', error);
+                }
+            }
+            
             const searchForm = document.getElementById('searchForm');
             if (searchForm && typeof voterDB !== 'undefined' && typeof searchFromIndexedDB !== 'undefined') {
                 searchForm.addEventListener('submit', async function(e) {

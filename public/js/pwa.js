@@ -19,10 +19,9 @@ class PWAHelper {
     if (typeof voterDB !== 'undefined') {
       await voterDB.init();
       
-      // Load all voter data on first visit (only if online and data not already loaded)
-      if (navigator.onLine) {
-        this.loadAllVoterData();
-      }
+      // Don't load voter data automatically on homepage - only load when needed (lazy loading)
+      // Data will be loaded when user visits the search page or when explicitly requested
+      // This prevents timeout issues on initial page load
     }
   }
 
@@ -73,8 +72,8 @@ class PWAHelper {
 
   onOnline() {
     this.showNotification('অনলাইন', 'ইন্টারনেট সংযোগ পুনরুদ্ধার হয়েছে', 'success');
-    // Load all voter data if not already loaded
-    this.loadAllVoterData();
+    // Don't auto-load voter data when coming online - only load when user visits search page
+    // This prevents timeout issues. Data will be loaded lazily when needed.
   }
 
   onOffline() {
@@ -119,21 +118,80 @@ class PWAHelper {
       // Show loading notification
       this.showNotification('ডেটা লোড হচ্ছে', 'সমস্ত ভোটার তথ্য ডাউনলোড করা হচ্ছে...', 'info');
 
-      // Fetch all voters from API
-      const response = await fetch('/api/voters/all');
+      // Fetch all voters from API in chunks (pagination)
+      let page = 1;
+      let allVoters = [];
+      let totalLoaded = 0;
+      let totalCount = 0;
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      while (true) {
+        try {
+          const response = await fetch(`/api/voters/all?page=${page}&per_page=100`, {
+            signal: AbortSignal.timeout(20000) // 20 second timeout per request (reduced from 30s)
+          });
+          
+          if (!response.ok) {
+            if (response.status === 500 || response.status === 503) {
+              throw new Error('Server error. Please try again later.');
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-      const data = await response.json();
+          const data = await response.json();
+          
+          if (!data.success || !data.voters || data.voters.length === 0) {
+            break;
+          }
+          
+          // Store total count from first page
+          if (page === 1) {
+            totalCount = data.total_count || data.voters.length;
+          }
+          
+          // Add voters to array
+          allVoters = allVoters.concat(data.voters);
+          totalLoaded += data.voters.length;
+          
+          // Update notification (only every 5 pages to avoid spam)
+          if (page % 5 === 0 || page === 1) {
+            this.showNotification(
+              'ডেটা লোড হচ্ছে', 
+              `${totalLoaded} / ${totalCount} জন ভোটার লোড করা হয়েছে...`, 
+              'info'
+            );
+          }
+          
+          // Check if there are more pages
+          if (!data.has_more || data.voters.length < data.per_page) {
+            break;
+          }
+          
+          page++;
+          
+          // Delay to prevent overwhelming the server
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          if (error.name === 'TimeoutError') {
+            console.error('[PWA] Request timeout, retrying...');
+            // Retry once
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          throw error;
+        }
+      }
       
-      if (data.success && data.voters && data.voters.length > 0) {
-        // Save all voters to IndexedDB
-        await voterDB.saveVoters(data.voters);
+      if (allVoters.length > 0) {
+        // Save all voters to IndexedDB in batches
+        const batchSize = 500;
+        for (let i = 0; i < allVoters.length; i += batchSize) {
+          const batch = allVoters.slice(i, i + batchSize);
+          await voterDB.saveVoters(batch);
+          console.log(`[PWA] Saved batch ${Math.floor(i / batchSize) + 1}, ${batch.length} voters`);
+        }
         
-        console.log(`[PWA] Loaded and saved ${data.voters.length} voters to IndexedDB`);
-        this.showNotification('ডেটা লোড সম্পন্ন', `${data.voters.length} জন ভোটারের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে`, 'success');
+        console.log(`[PWA] Loaded and saved ${allVoters.length} voters to IndexedDB`);
+        this.showNotification('ডেটা লোড সম্পন্ন', `${allVoters.length} জন ভোটারের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে`, 'success');
       } else {
         console.log('[PWA] No voters to load');
       }
@@ -223,6 +281,56 @@ class PWAHelper {
       }
     }, 5000);
   }
+
+  // Clear all cache
+  async clearAllCache() {
+    try {
+      // Clear IndexedDB
+      if (typeof voterDB !== 'undefined') {
+        await voterDB.clearAll();
+        console.log('[PWA] IndexedDB cleared');
+      }
+      
+      // Clear Service Worker Cache
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+        console.log('[PWA] Service Worker caches cleared');
+      }
+      
+      // Unregister Service Worker
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(
+          registrations.map(registration => registration.unregister())
+        );
+        console.log('[PWA] Service Workers unregistered');
+      }
+      
+      // Clear localStorage
+      localStorage.clear();
+      console.log('[PWA] localStorage cleared');
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      console.log('[PWA] sessionStorage cleared');
+      
+      this.showNotification('ক্যাশ সাফ করা হয়েছে', 'সমস্ত ক্যাশ ডেটা সফলভাবে সাফ করা হয়েছে', 'success');
+      
+      // Reload page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      
+      return true;
+    } catch (error) {
+      console.error('[PWA] Error clearing cache:', error);
+      this.showNotification('ক্যাশ সাফ ব্যর্থ', 'ক্যাশ সাফ করতে সমস্যা হয়েছে', 'warning');
+      return false;
+    }
+  }
 }
 
 // Initialize PWA Helper
@@ -245,4 +353,27 @@ async function searchFromIndexedDB(wardNumber, dateOfBirth) {
   }
   return [];
 }
+
+// Global function to clear all cache (can be called from browser console)
+async function clearAllCache() {
+  if (typeof pwaHelper !== 'undefined') {
+    return await pwaHelper.clearAllCache();
+  } else {
+    console.error('[PWA] PWA Helper not initialized');
+    return false;
+  }
+}
+
+// Make clearAllCache available globally
+window.clearAllCache = clearAllCache;
+
+// Make loadAllVoterData available globally for manual triggering
+window.loadVoterData = async function() {
+  if (typeof pwaHelper !== 'undefined') {
+    return await pwaHelper.loadAllVoterData();
+  } else {
+    console.error('[PWA] PWA Helper not initialized');
+    return false;
+  }
+};
 

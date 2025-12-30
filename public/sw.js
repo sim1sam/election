@@ -60,7 +60,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle API requests (voter search)
+  // Handle API requests - don't cache, always use network
+  if (url.pathname.startsWith('/api/')) {
+    // For API calls, always try network first, don't cache
+    event.respondWith(fetch(request).catch(() => {
+      return new Response('API unavailable', { status: 503 });
+    }));
+    return;
+  }
+
+  // Handle voter search POST requests - don't cache
+  if (url.pathname.startsWith('/search') && request.method === 'POST') {
+    // Let POST requests go through normally
+    return;
+  }
+  
+  // Handle voter search GET requests
   if (url.pathname.startsWith('/search') && url.search) {
     event.respondWith(networkFirstStrategy(request, DATA_CACHE));
     return;

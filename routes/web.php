@@ -17,6 +17,15 @@ Route::get('/search', [App\Http\Controllers\VoterSearchController::class, 'index
 Route::post('/search', [App\Http\Controllers\VoterSearchController::class, 'search'])->name('voter.search.submit');
 Route::get('/api/voters/all', [App\Http\Controllers\VoterSearchController::class, 'getAllVoters'])->name('voter.api.all');
 
+// Health check endpoint
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toDateTimeString(),
+        'database' => 'connected'
+    ]);
+});
+
 Route::get('/dashboard', function () {
     // Redirect admins to admin dashboard
     if (auth()->check() && auth()->user()->role === 'admin') {

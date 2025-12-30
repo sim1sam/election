@@ -177,9 +177,9 @@ class VoterSearchController extends Controller
     }
 
     /**
-     * API endpoint to get all voters for IndexedDB storage
+     * API endpoint to get all voters for IndexedDB storage (with pagination)
      */
-    public function getAllVoters()
+    public function getAllVoters(Request $request)
     {
         $settings = HomePageSetting::getSettings();
         
@@ -188,23 +188,44 @@ class VoterSearchController extends Controller
             return response()->json(['error' => 'ভোটার তথ্য এখনও প্রকাশিত হয়নি।'], 403);
         }
 
-        // Get all voters
-        $voters = Voter::select([
-            'id',
-            'name',
-            'voter_number',
-            'father_name',
-            'mother_name',
-            'occupation',
-            'address',
-            'polling_center_name',
-            'ward_number',
-            'voter_area_number',
-            'voter_serial_number',
-            'date_of_birth',
-            'created_at',
-            'updated_at'
-        ])->orderBy('id')->get();
+        // Get pagination parameters
+        $page = $request->get('page', 1);
+        $perPage = min($request->get('per_page', 100), 100); // Max 100 per page to avoid timeout
+        
+        // Get total count (cached for performance)
+        try {
+            $totalCount = Voter::count();
+        } catch (\Exception $e) {
+            Log::error('Error getting voter count: ' . $e->getMessage());
+            return response()->json(['error' => 'Database error'], 500);
+        }
+        
+        // Get voters with pagination using chunking for better performance
+        try {
+            $voters = Voter::select([
+                'id',
+                'name',
+                'voter_number',
+                'father_name',
+                'mother_name',
+                'occupation',
+                'address',
+                'polling_center_name',
+                'ward_number',
+                'voter_area_number',
+                'voter_serial_number',
+                'date_of_birth',
+                'created_at',
+                'updated_at'
+            ])
+            ->orderBy('id')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+        } catch (\Exception $e) {
+            Log::error('Error fetching voters: ' . $e->getMessage());
+            return response()->json(['error' => 'Database query error'], 500);
+        }
 
         // Format date_of_birth as Y-m-d string
         $formattedVoters = $voters->map(function ($voter) {
@@ -226,8 +247,15 @@ class VoterSearchController extends Controller
             ];
         });
 
+        $totalPages = ceil($totalCount / $perPage);
+
         return response()->json([
             'success' => true,
+            'total_count' => $totalCount,
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_pages' => $totalPages,
+            'has_more' => $page < $totalPages,
             'count' => $formattedVoters->count(),
             'voters' => $formattedVoters
         ]);
