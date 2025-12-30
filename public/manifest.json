@@ -1,0 +1,33 @@
+{
+  "name": "ঢাকা-১৩ আসনের ভোটারদের তথ্য",
+  "short_name": "ভোটার তথ্য",
+  "description": "ঢাকা-১৩ আসনের ভোটারদের তথ্য খুঁজুন",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#006A4E",
+  "theme_color": "#006A4E",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["government", "utilities"],
+  "lang": "bn",
+  "dir": "ltr"
+}
+

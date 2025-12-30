@@ -158,6 +158,78 @@ class VoterSearchController extends Controller
             $voters = collect([]);
         }
 
+        // Check if results are from IndexedDB
+        if ($request->has('from_indexeddb') && $request->from_indexeddb == '1' && $request->has('indexeddb_results')) {
+            try {
+                $results = json_decode($request->indexeddb_results, true);
+                if (is_array($results)) {
+                    $voters = collect($results)->map(function ($item) {
+                        return (object) $item;
+                    });
+                    return view('voter-search-results', compact('voters', 'settings', 'request'));
+                }
+            } catch (\Exception $e) {
+                Log::error('Error parsing IndexedDB results: ' . $e->getMessage());
+            }
+        }
+
         return view('voter-search-results', compact('voters', 'settings', 'request'));
+    }
+
+    /**
+     * API endpoint to get all voters for IndexedDB storage
+     */
+    public function getAllVoters()
+    {
+        $settings = HomePageSetting::getSettings();
+        
+        // Check if countdown has finished
+        if (!$this->isCountdownFinished($settings)) {
+            return response()->json(['error' => 'ভোটার তথ্য এখনও প্রকাশিত হয়নি।'], 403);
+        }
+
+        // Get all voters
+        $voters = Voter::select([
+            'id',
+            'name',
+            'voter_number',
+            'father_name',
+            'mother_name',
+            'occupation',
+            'address',
+            'polling_center_name',
+            'ward_number',
+            'voter_area_number',
+            'voter_serial_number',
+            'date_of_birth',
+            'created_at',
+            'updated_at'
+        ])->orderBy('id')->get();
+
+        // Format date_of_birth as Y-m-d string
+        $formattedVoters = $voters->map(function ($voter) {
+            return [
+                'id' => $voter->id,
+                'name' => $voter->name,
+                'voter_number' => $voter->voter_number,
+                'father_name' => $voter->father_name,
+                'mother_name' => $voter->mother_name,
+                'occupation' => $voter->occupation,
+                'address' => $voter->address,
+                'polling_center_name' => $voter->polling_center_name,
+                'ward_number' => $voter->ward_number,
+                'voter_area_number' => $voter->voter_area_number,
+                'voter_serial_number' => $voter->voter_serial_number,
+                'date_of_birth' => $voter->date_of_birth ? $voter->date_of_birth->format('Y-m-d') : null,
+                'created_at' => $voter->created_at ? $voter->created_at->toDateTimeString() : null,
+                'updated_at' => $voter->updated_at ? $voter->updated_at->toDateTimeString() : null,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $formattedVoters->count(),
+            'voters' => $formattedVoters
+        ]);
     }
 }

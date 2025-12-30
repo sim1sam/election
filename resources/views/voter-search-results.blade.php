@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#006A4E">
+    <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য">
     <title>ঢাকা–১৩ আসনের ভোটারদের তথ্য</title>
+    <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -580,7 +583,44 @@
                 btn.style.background = 'linear-gradient(135deg, #F42A41 0%, #006A4E 100%)';
             }
         }
+        
+        // Save search results to IndexedDB when online (for future offline access)
+        @if($voters && $voters->count() > 0)
+        @php
+            $votersData = $voters->map(function($voter) {
+                return [
+                    'id' => $voter->id,
+                    'name' => $voter->name,
+                    'voter_number' => $voter->voter_number,
+                    'father_name' => $voter->father_name ?? null,
+                    'mother_name' => $voter->mother_name ?? null,
+                    'occupation' => $voter->occupation ?? null,
+                    'address' => $voter->address ?? null,
+                    'polling_center_name' => $voter->polling_center_name ?? null,
+                    'ward_number' => $voter->ward_number ?? null,
+                    'voter_area_number' => $voter->voter_area_number ?? null,
+                    'voter_serial_number' => $voter->voter_serial_number ?? null,
+                    'date_of_birth' => $voter->date_of_birth ? ($voter->date_of_birth instanceof \Carbon\Carbon ? $voter->date_of_birth->format('Y-m-d') : \Carbon\Carbon::parse($voter->date_of_birth)->format('Y-m-d')) : null,
+                ];
+            })->values()->all();
+        @endphp
+        (async function() {
+            if (navigator.onLine && typeof voterDB !== 'undefined') {
+                try {
+                    const votersData = @json($votersData);
+                    await voterDB.saveVoters(votersData);
+                    console.log(`[PWA] Saved ${votersData.length} search results to IndexedDB`);
+                } catch (error) {
+                    console.error('[PWA] Error saving search results:', error);
+                }
+            }
+        })();
+        @endif
     </script>
+    
+    <!-- PWA Scripts -->
+    <script src="/js/indexeddb.js"></script>
+    <script src="/js/pwa.js"></script>
 </body>
 </html>
 

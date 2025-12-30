@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#006A4E">
+    <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য খুঁজুন">
     <title>ভোটার তথ্য খুঁজুন</title>
+    <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -764,6 +767,63 @@
             </div>
         </div>
     </div>
+    
+    <!-- PWA Scripts -->
+    <script src="/js/indexeddb.js"></script>
+    <script src="/js/pwa.js"></script>
+    
+    <!-- Search form handler - use server when online, cache when offline -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm && typeof voterDB !== 'undefined' && typeof searchFromIndexedDB !== 'undefined') {
+                searchForm.addEventListener('submit', async function(e) {
+                    const wardNumber = document.getElementById('ward_number').value.trim();
+                    const dateOfBirth = document.getElementById('date_of_birth').value.trim();
+                    
+                    // If offline, search from IndexedDB cache
+                    if (!navigator.onLine) {
+                        e.preventDefault();
+                        try {
+                            // Check if IndexedDB has data
+                            const count = await voterDB.getCount();
+                            if (count === 0) {
+                                alert('অফলাইন মোড: কোন ক্যাশ ডেটা নেই। অনুগ্রহ করে ইন্টারনেট সংযোগ করুন।\nOffline mode: No cached data. Please connect to internet.');
+                                return false;
+                            }
+                            
+                            // Search from IndexedDB
+                            const results = await searchFromIndexedDB(wardNumber, dateOfBirth);
+                            
+                            if (results.length > 0) {
+                                // Store results and submit
+                                const hiddenForm = document.createElement('form');
+                                hiddenForm.method = 'POST';
+                                hiddenForm.action = '{{ route("voter.search.submit") }}';
+                                hiddenForm.innerHTML = `
+                                    @csrf
+                                    <input type="hidden" name="ward_number" value="${wardNumber}">
+                                    <input type="hidden" name="date_of_birth" value="${dateOfBirth}">
+                                    <input type="hidden" name="from_indexeddb" value="1">
+                                    <input type="hidden" name="indexeddb_results" value='${JSON.stringify(results)}'>
+                                `;
+                                document.body.appendChild(hiddenForm);
+                                hiddenForm.submit();
+                            } else {
+                                alert('অফলাইন মোড: কোন ভোটার পাওয়া যায়নি।\nOffline mode: No voters found.');
+                                return false;
+                            }
+                        } catch (error) {
+                            console.error('Offline search error:', error);
+                            alert('অফলাইন খোঁজার সময় একটি ত্রুটি হয়েছে।\nAn error occurred during offline search.');
+                            return false;
+                        }
+                    }
+                    // If online, let form submit normally to server
+                });
+            }
+        });
+    </script>
 </body>
 </html>
 

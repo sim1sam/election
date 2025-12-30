@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#006A4E">
+    <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য">
     <title>ঢাকা–১৩ আসনের ভোটারদের তথ্য</title>
+    <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1215,5 +1218,9 @@
             }
         });
     </script>
+    
+    <!-- PWA Scripts -->
+    <script src="/js/indexeddb.js"></script>
+    <script src="/js/pwa.js"></script>
 </body>
 </html>

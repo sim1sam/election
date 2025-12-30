@@ -15,6 +15,7 @@ Route::get('/qrcode/scan/{id}', [App\Http\Controllers\QRCodeScanController::clas
 // Voter Search (Public)
 Route::get('/search', [App\Http\Controllers\VoterSearchController::class, 'index'])->name('voter.search');
 Route::post('/search', [App\Http\Controllers\VoterSearchController::class, 'search'])->name('voter.search.submit');
+Route::get('/api/voters/all', [App\Http\Controllers\VoterSearchController::class, 'getAllVoters'])->name('voter.api.all');
 
 Route::get('/dashboard', function () {
     // Redirect admins to admin dashboard
