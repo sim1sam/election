@@ -415,62 +415,6 @@
                                 <span class="detail-value">{{ $voter->father_name }}</span>
                             </div>
                             @endif
-                            
-                            {{-- @if($voter->mother_name)
-                            <div class="detail-item">
-                                <span class="detail-label">মাতা:</span>
-                                <span class="detail-value">{{ $voter->mother_name }}</span>
-                            </div>
-                            @endif --}}
-                            
-                            @if($voter->ward_number)
-                            <div class="detail-item">
-                                <span class="detail-label">ওয়ার্ড নম্বর:</span>
-                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->ward_number) }}</span>
-                            </div>
-                            @endif
-                            
-                            @if($voter->voter_area_number)
-                            <div class="detail-item">
-                                <span class="detail-label">ভোটার এলাকার নম্বর:</span>
-                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_area_number) }}</span>
-                            </div>
-                            @endif
-                            
-                            @if($voter->voter_serial_number)
-                            <div class="detail-item">
-                                <span class="detail-label">ভোটার সিরিয়াল নম্বর:</span>
-                                <span class="detail-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_serial_number) }}</span>
-                            </div>
-                            @endif
-                            
-                            @if($voter->date_of_birth)
-                            <div class="detail-item">
-                                <span class="detail-label">জন্ম তারিখ:</span>
-                                <span class="detail-value">
-                                    @php
-                                        $dateStr = $voter->date_of_birth instanceof \Carbon\Carbon 
-                                            ? $voter->date_of_birth->format('d/m/Y') 
-                                            : \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y');
-                                    @endphp
-                                    {{ \App\Helpers\NumberConverter::englishToBangla($dateStr) }}
-                                </span>
-                            </div>
-                            @endif
-                            
-                            {{-- @if($voter->polling_center_name)
-                            <div class="detail-item">
-                                <span class="detail-label">ভোট কেন্দ্র:</span>
-                                <span class="detail-value">{{ $voter->polling_center_name }}</span>
-                            </div>
-                            @endif
-                            
-                            @if($voter->address)
-                            <div class="detail-item">
-                                <span class="detail-label">ঠিকানা:</span>
-                                <span class="detail-value">{{ Str::limit($voter->address, 50) }}</span>
-                            </div>
-                            @endif --}}
                         </div>
                         
                         <button class="btn-view-all" onclick="showFullDetails(this, {{ $voter->id }})">
