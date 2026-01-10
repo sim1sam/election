@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\NumberConverter;
+use Mpdf\Mpdf;
 
 class VoterSearchController extends Controller
 {
@@ -259,5 +260,56 @@ class VoterSearchController extends Controller
             'count' => $formattedVoters->count(),
             'voters' => $formattedVoters
         ]);
+    }
+
+    /**
+     * Download voter information as PDF
+     */
+    public function downloadPdf($id)
+    {
+        $voter = Voter::findOrFail($id);
+        
+        // Generate PDF filename using person's name
+        $filename = str_replace([' ', '/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $voter->name) . '.pdf';
+        
+        // Render the view to HTML
+        $html = view('voter-pdf', compact('voter'))->render();
+        
+        // Configure mPDF with Bengali font support
+        $fontConfig = [
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 15,
+            'margin_bottom' => 15,
+            'tempDir' => storage_path('app/temp'),
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'useSubstitutions' => true,
+        ];
+        
+        // Add Bengali font if available
+        $bengaliFontPath = base_path('vendor/mpdf/mpdf/ttfonts/NotoSansBengali-Regular.ttf');
+        if (file_exists($bengaliFontPath) && filesize($bengaliFontPath) > 1000) {
+            $fontConfig['fontDir'] = [
+                base_path('vendor/mpdf/mpdf/ttfonts'),
+            ];
+            $fontConfig['fontdata'] = [
+                'notosansbengali' => [
+                    'R' => 'NotoSansBengali-Regular.ttf',
+                ],
+            ];
+            $fontConfig['default_font'] = 'notosansbengali';
+        }
+        
+        $mpdf = new Mpdf($fontConfig);
+        
+        // Write HTML content
+        $mpdf->WriteHTML($html);
+        
+        // Output PDF as download
+        return $mpdf->Output($filename, 'D');
     }
 }

@@ -213,6 +213,26 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
+        .btn-download {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: #fff;
+        }
+        
         .no-results {
             text-align: center;
             padding: 60px 20px;
@@ -311,7 +331,8 @@
                 font-size: 0.95rem;
             }
             
-            .btn-view-all {
+            .btn-view-all,
+            .btn-download {
                 width: 100%;
                 padding: 10px;
                 font-size: 0.95rem;
@@ -417,9 +438,14 @@
                             @endif
                         </div>
                         
-                        <button class="btn-view-all" onclick="showFullDetails(this, {{ $voter->id }})">
-                            <i class="fas fa-eye"></i> সম্পূর্ণ তথ্য দেখুন
-                        </button>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="btn-view-all" onclick="showFullDetails(this, {{ $voter->id }})" style="flex: 1;">
+                                <i class="fas fa-eye"></i> সম্পূর্ণ তথ্য দেখুন
+                            </button>
+                            <a href="{{ route('voter.download-pdf', $voter->id) }}" class="btn-download" style="flex: 1; text-decoration: none; display: inline-block; text-align: center;">
+                                <i class="fas fa-download"></i> 
+                            </a>
+                        </div>
                         
                         <!-- Full Details Section (Hidden by default) -->
                         <div class="full-details" id="details-{{ $voter->id }}" style="display: none;">
