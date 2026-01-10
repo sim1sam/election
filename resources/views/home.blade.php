@@ -572,14 +572,17 @@
         /* Carousel Controls */
         .carousel-controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 5px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
             gap: 15px;
             z-index: 100;
-            margin-bottom: 10px;
+            width: 100%;
+            justify-content: center;
+            padding: 0 20px;
+            margin-bottom: -28px;
         }
         
         .carousel-btn {
@@ -867,8 +870,8 @@
             }
             
             .carousel-controls {
-                bottom: 10px;
-                margin-bottom: 5px;
+                bottom: 5px;
+                padding: 0 15px;
             }
             
             .carousel-btn {
@@ -916,8 +919,9 @@
             }
             
             .carousel-controls {
-                bottom: 8px;
+                bottom: 5px;
                 gap: 10px;
+                padding: 0 10px;
             }
             
             .carousel-btn {
