@@ -288,17 +288,36 @@ class VoterSearchController extends Controller
             'autoScriptToLang' => true,
             'autoLangToFont' => true,
             'useSubstitutions' => true,
+            'default_font' => 'freeserif',
         ];
         
         // Add Bengali font if available
         $bengaliFontPath = base_path('vendor/mpdf/mpdf/ttfonts/NotoSansBengali-Regular.ttf');
+        $storageFontPath = storage_path('fonts/NotoSansBengali-Regular.ttf');
+        
+        // Check both locations for the font file
+        $fontFile = null;
+        $fontDir = null;
+        
         if (file_exists($bengaliFontPath) && filesize($bengaliFontPath) > 1000) {
-            $fontConfig['fontDir'] = [
-                base_path('vendor/mpdf/mpdf/ttfonts'),
-            ];
+            $fontFile = 'NotoSansBengali-Regular.ttf';
+            $fontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+        } elseif (file_exists($storageFontPath) && filesize($storageFontPath) > 1000) {
+            // Copy from storage to vendor if needed
+            if (!file_exists($bengaliFontPath)) {
+                @copy($storageFontPath, $bengaliFontPath);
+            }
+            if (file_exists($bengaliFontPath) && filesize($bengaliFontPath) > 1000) {
+                $fontFile = 'NotoSansBengali-Regular.ttf';
+                $fontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+            }
+        }
+        
+        if ($fontFile && $fontDir) {
+            $fontConfig['fontDir'] = [$fontDir];
             $fontConfig['fontdata'] = [
                 'notosansbengali' => [
-                    'R' => 'NotoSansBengali-Regular.ttf',
+                    'R' => $fontFile,
                 ],
             ];
             $fontConfig['default_font'] = 'notosansbengali';

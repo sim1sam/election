@@ -216,21 +216,26 @@
         .btn-download {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: transparent;
             border: none;
             border-radius: 8px;
             color: #fff;
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .btn-download:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             color: #fff;
+        }
+        
+        .btn-download i {
+            font-size: 1.2rem;
         }
         
         .no-results {
@@ -443,7 +448,7 @@
                                 <i class="fas fa-eye"></i> সম্পূর্ণ তথ্য দেখুন
                             </button>
                             <a href="{{ route('voter.download-pdf', $voter->id) }}" class="btn-download" style="flex: 1; text-decoration: none; display: inline-block; text-align: center;">
-                                <i class="fas fa-download"></i> 
+                                <i class="fas fa-download" style="margin-top: 13px;"></i>
                             </a>
                         </div>
                         

@@ -100,6 +100,7 @@
             vertical-align: top;
             text-align: left;
             display: table-cell;
+            font-family: notosansbengali, freeserif, sans-serif !important;
         }
         
         .info-value {
@@ -136,53 +137,53 @@
     <div class="voter-info">
         <table class="info-table">
             <tr class="info-row">
-                <td class="info-label">নাম:</td>
+                <td class="info-label">Name:</td>
                 <td class="info-value">{!! htmlspecialchars($voter->name, ENT_QUOTES, 'UTF-8') !!}</td>
             </tr>
             
             <tr class="info-row">
-                <td class="info-label">ভোটার নম্বর:</td>
+                <td class="info-label">Voter Number:</td>
                 <td class="info-value">{!! \App\Helpers\NumberConverter::englishToBangla($voter->voter_number) !!}</td>
             </tr>
             
             @if($voter->father_name)
             <tr class="info-row">
-                <td class="info-label">পিতা:</td>
+                <td class="info-label">Father's Name:</td>
                 <td class="info-value">{!! htmlspecialchars($voter->father_name, ENT_QUOTES, 'UTF-8') !!}</td>
             </tr>
             @endif
             
             @if($voter->mother_name)
             <tr class="info-row">
-                <td class="info-label">মাতা:</td>
+                <td class="info-label">Mother's Name:</td>
                 <td class="info-value">{!! htmlspecialchars($voter->mother_name, ENT_QUOTES, 'UTF-8') !!}</td>
             </tr>
             @endif
             
             @if($voter->ward_number)
             <tr class="info-row">
-                <td class="info-label">ওয়ার্ড নম্বর:</td>
+                <td class="info-label">Ward Number:</td>
                 <td class="info-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->ward_number) }}</td>
             </tr>
             @endif
             
             @if($voter->voter_area_number)
             <tr class="info-row">
-                <td class="info-label">ভোটার এলাকার নম্বর:</td>
+                <td class="info-label">Voter Area Number:</td>
                 <td class="info-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_area_number) }}</td>
             </tr>
             @endif
             
             @if($voter->voter_serial_number)
             <tr class="info-row">
-                <td class="info-label">ভোটার সিরিয়াল নম্বর:</td>
+                <td class="info-label">Voter Serial Number:</td>
                 <td class="info-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_serial_number) }}</td>
             </tr>
             @endif
             
             @if($voter->date_of_birth)
             <tr class="info-row">
-                <td class="info-label">জন্ম তারিখ:</td>
+                <td class="info-label">Date of Birth:</td>
                 <td class="info-value">
                     @php
                         $dateStr = $voter->date_of_birth instanceof \Carbon\Carbon 
@@ -196,21 +197,21 @@
             
             @if($voter->occupation)
             <tr class="info-row">
-                <td class="info-label">পেশা:</td>
+                <td class="info-label">Occupation:</td>
                 <td class="info-value">{!! htmlspecialchars($voter->occupation, ENT_QUOTES, 'UTF-8') !!}</td>
             </tr>
             @endif
             
             @if($voter->address)
             <tr class="info-row">
-                <td class="info-label">ঠিকানা:</td>
+                <td class="info-label">Address:</td>
                 <td class="info-value">{!! htmlspecialchars($voter->address, ENT_QUOTES, 'UTF-8') !!}</td>
             </tr>
             @endif
             
             @if($voter->polling_center_name)
             <tr class="info-row">
-                <td class="info-label">ভোট কেন্দ্র:</td>
+                <td class="info-label">Polling Center:</td>
                 <td class="info-value">{!! htmlspecialchars($voter->polling_center_name, ENT_QUOTES, 'UTF-8') !!}</td>
             </tr>
             @endif
