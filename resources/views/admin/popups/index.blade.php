@@ -27,6 +27,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Format</th>
                         <th>Image</th>
                         <th>Icon</th>
                         <th>Title</th>
@@ -40,6 +41,11 @@
                         <tr>
                             <td>{{ $popup->id }}</td>
                             <td>
+                                <span class="badge badge-{{ $popup->format == '1' ? 'primary' : 'info' }}">
+                                    Format {{ $popup->format ?? '1' }}
+                                </span>
+                            </td>
+                            <td>
                                 @if($popup->image)
                                     <img src="{{ Storage::url($popup->image) }}" alt="Image" style="max-width: 50px; max-height: 50px;">
                                 @else
@@ -47,14 +53,24 @@
                                 @endif
                             </td>
                             <td>
-                                @if($popup->icon_image)
-                                    <img src="{{ Storage::url($popup->icon_image) }}" alt="Icon" style="max-width: 50px; max-height: 50px;">
+                                @if($popup->format == '1')
+                                    @if($popup->icon_image)
+                                        <img src="{{ Storage::url($popup->icon_image) }}" alt="Icon" style="max-width: 50px; max-height: 50px;">
+                                    @else
+                                        <span class="text-muted">No icon</span>
+                                    @endif
                                 @else
-                                    <span class="text-muted">No icon</span>
+                                    <span class="text-muted">N/A</span>
                                 @endif
                             </td>
                             <td>{{ Str::limit($popup->title, 30) }}</td>
-                            <td>{{ Str::limit($popup->message, 30) }}</td>
+                            <td>
+                                @if($popup->format == '1')
+                                    {{ Str::limit($popup->message, 30) }}
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($popup->is_active)
                                     <span class="badge badge-success">Active</span>
@@ -77,7 +93,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center">No popups found. <a href="{{ route('admin.popups.create') }}">Create one</a></td>
+                            <td colspan="8" class="text-center">No popups found. <a href="{{ route('admin.popups.create') }}">Create one</a></td>
                         </tr>
                     @endforelse
                 </tbody>

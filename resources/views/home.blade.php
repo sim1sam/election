@@ -479,11 +479,156 @@
             justify-content: center;
             transition: all 0.3s ease;
             z-index: 1000;
+            opacity: 0.6;
+            margin-bottom: 10px;
         }
         
         .modal-close:hover {
             background: rgba(0, 0, 0, 0.2);
             transform: rotate(90deg);
+            opacity: 0.9;
+        }
+        
+        /* Popup Carousel Styles */
+        .popup-carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .popup-carousel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .popup-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .popup-slide.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Format 2 Styles - Full Width Image + Title */
+        .popup-format-2 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .format-2-image {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            min-height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #006A4E;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        .format-2-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-placeholder {
+            font-size: 5rem;
+            color: #666;
+        }
+        
+        .format-2-title {
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .format-2-title h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #006A4E;
+            margin: 0;
+            line-height: 1.3;
+        }
+        
+        /* Carousel Controls */
+        .carousel-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+            margin-bottom: 10px;
+        }
+        
+        .carousel-btn {
+            background: rgba(0, 106, 78, 0.5);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+        
+        .carousel-btn:hover {
+            background: rgba(0, 106, 78, 0.7);
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+        
+        .carousel-indicators {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .indicator.active {
+            background: #006A4E;
+            width: 30px;
+            border-radius: 6px;
+        }
+        
+        .indicator:hover {
+            background: rgba(0, 106, 78, 0.8);
         }
         
         .campaign-popup {
@@ -703,6 +848,35 @@
             .campaign-image-placeholder {
                 font-size: 3rem;
             }
+            
+            /* Format 2 Mobile Styles */
+            .popup-format-2 {
+                padding: 20px 15px;
+            }
+            
+            .format-2-image {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto;
+                min-height: 250px;
+                margin-bottom: 20px;
+            }
+            
+            .format-2-title h3 {
+                font-size: 1.8rem;
+            }
+            
+            .carousel-controls {
+                bottom: 10px;
+                margin-bottom: 5px;
+            }
+            
+            .carousel-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -722,6 +896,35 @@
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
+            }
+            
+            /* Format 2 Small Mobile Styles - Only affects Format 2 */
+            .format-2-image {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto;
+                min-height: 200px;
+                margin-bottom: 15px;
+            }
+            
+            .format-2-title h3 {
+                font-size: 1.5rem;
+            }
+            
+            .popup-format-2 {
+                padding: 15px 10px;
+            }
+            
+            .carousel-controls {
+                bottom: 8px;
+                gap: 10px;
+            }
+            
+            .carousel-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
             }
             
             .modal-close {
@@ -919,93 +1122,133 @@
 </head>
 <body>
     <div class="container">
-        <!-- Campaign Popup Modal -->
-        @if($popup)
+        <!-- Campaign Popup Modal with Carousel -->
+        @if($popups && $popups->count() > 0)
         <div class="modal-overlay" id="campaignModal">
             <div class="modal-content">
                 <button class="modal-close" onclick="closeCampaignModal()">&times;</button>
-                <div class="campaign-popup">
-                    <div class="campaign-image">
-                        @if($popup->image)
-                            <img src="{{ asset('storage/' . $popup->image) }}" alt="Campaign" />
-                        @else
-                            <div class="campaign-image-placeholder">👤</div>
-                        @endif
-                    </div>
-                    <div class="campaign-message">
-                        @if($popup->subtitle)
-                            <div class="campaign-subtitle">{{ $popup->subtitle }}</div>
-                        @endif
-                        <h3>{{ $popup->title }}</h3>
-                        <p>{{ $popup->message }}</p>
-                    </div>
-                    <div class="rickshaw-symbol">
-                        <div class="rickshaw-icon">
-                            <div class="rickshaw-container">
-                                @if($popup->icon_image)
-                                    <img src="{{ asset('storage/' . $popup->icon_image) }}" alt="Icon" />
-                                @else
-                                    <!-- Default SVG Rickshaw Icon -->
-                                    <svg viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" class="rickshaw-body">
-                                        <!-- Front Wheel -->
-                                        <g class="wheel" transform="translate(25, 120)">
-                                            <circle cx="0" cy="0" r="18" fill="#2c2c2c" stroke="#fff" stroke-width="2"/>
-                                            <circle cx="0" cy="0" r="11" fill="#444"/>
-                                            <circle cx="0" cy="0" r="4" fill="#fff"/>
-                                            <line x1="0" y1="-18" x2="0" y2="18" stroke="#fff" stroke-width="1.5"/>
-                                            <line x1="-18" y1="0" x2="18" y2="0" stroke="#fff" stroke-width="1.5"/>
-                                        </g>
-                                        
-                                        <!-- Bicycle Frame -->
-                                        <line x1="25" y1="120" x2="45" y2="75" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
-                                        <line x1="45" y1="75" x2="65" y2="95" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
-                                        <line x1="45" y1="75" x2="55" y2="55" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
-                                        
-                                        <!-- Handlebars -->
-                                        <line x1="55" y1="55" x2="70" y2="42" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
-                                        <line x1="70" y1="42" x2="70" y2="38" stroke="#2c2c2c" stroke-width="4" stroke-linecap="round"/>
-                                        <line x1="65" y1="40" x2="75" y2="40" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
-                                        
-                                        <!-- Driver Seat -->
-                                        <ellipse cx="45" cy="75" rx="9" ry="5" fill="#2c2c2c"/>
-                                        
-                                        <!-- Connection Bar -->
-                                        <line x1="65" y1="95" x2="75" y2="95" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
-                                        
-                                        <!-- Passenger Carriage Body -->
-                                        <rect x="75" y="95" width="95" height="40" rx="3" fill="#fff" stroke="#2c2c2c" stroke-width="2.5"/>
-                                        
-                                        <!-- High Arched Roof/Canopy -->
-                                        <path d="M 75 95 Q 122.5 45, 170 95" stroke="#F42A41" stroke-width="4" fill="none" stroke-linecap="round"/>
-                                        <path d="M 78 95 Q 122.5 50, 167 95" stroke="#F42A41" stroke-width="3" fill="none"/>
-                                        <path d="M 80 95 Q 122.5 55, 165 95 L 165 100 L 80 100 Z" fill="#F42A41" opacity="0.35"/>
-                                        
-                                        <!-- Carriage Sides -->
-                                        <line x1="75" y1="95" x2="75" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
-                                        <line x1="170" y1="95" x2="170" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
-                                        <line x1="75" y1="135" x2="170" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
-                                        
-                                        <!-- Rear Wheels -->
-                                        <g class="wheel" transform="translate(100, 140)">
-                                            <circle cx="0" cy="0" r="18" fill="#2c2c2c" stroke="#fff" stroke-width="2"/>
-                                            <circle cx="0" cy="0" r="11" fill="#444"/>
-                                            <circle cx="0" cy="0" r="4" fill="#fff"/>
-                                            <line x1="0" y1="-18" x2="0" y2="18" stroke="#fff" stroke-width="1.5"/>
-                                            <line x1="-18" y1="0" x2="18" y2="0" stroke="#fff" stroke-width="1.5"/>
-                                        </g>
-                                        
-                                        <g class="wheel" transform="translate(135, 140)">
-                                            <circle cx="0" cy="0" r="18" fill="#2c2c2c" stroke="#fff" stroke-width="2"/>
-                                            <circle cx="0" cy="0" r="11" fill="#444"/>
-                                            <circle cx="0" cy="0" r="4" fill="#fff"/>
-                                            <line x1="0" y1="-18" x2="0" y2="18" stroke="#fff" stroke-width="1.5"/>
-                                            <line x1="-18" y1="0" x2="18" y2="0" stroke="#fff" stroke-width="1.5"/>
-                                        </g>
-                                    </svg>
-                                @endif
-                            </div>
+                
+                <!-- Popup Carousel Container -->
+                <div class="popup-carousel-container">
+                    <div class="popup-carousel" id="popupCarousel">
+                        @foreach($popups as $index => $popup)
+                        <div class="popup-slide {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}">
+                            @if($popup->format == '2')
+                                <!-- Format 2: Simple (Full Width Image + Title) -->
+                                <div class="popup-format-2">
+                                    <div class="format-2-image">
+                                        @if($popup->image)
+                                            <img src="{{ asset('storage/' . $popup->image) }}" alt="{{ $popup->title }}" />
+                                        @else
+                                            <div class="image-placeholder">📷</div>
+                                        @endif
+                                    </div>
+                                    <div class="format-2-title">
+                                        <h3>{{ $popup->title }}</h3>
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Format 1: Full (Image, Icon, Title, Subtitle, Message) -->
+                                <div class="campaign-popup">
+                                    <div class="campaign-image">
+                                        @if($popup->image)
+                                            <img src="{{ asset('storage/' . $popup->image) }}" alt="Campaign" />
+                                        @else
+                                            <div class="campaign-image-placeholder">👤</div>
+                                        @endif
+                                    </div>
+                                    <div class="campaign-message">
+                                        @if($popup->subtitle)
+                                            <div class="campaign-subtitle">{{ $popup->subtitle }}</div>
+                                        @endif
+                                        <h3>{{ $popup->title }}</h3>
+                                        <p>{{ $popup->message }}</p>
+                                    </div>
+                                    <div class="rickshaw-symbol">
+                                        <div class="rickshaw-icon">
+                                            <div class="rickshaw-container">
+                                                @if($popup->icon_image)
+                                                    <img src="{{ asset('storage/' . $popup->icon_image) }}" alt="Icon" />
+                                                @else
+                                                    <!-- Default SVG Rickshaw Icon -->
+                                                    <svg viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" class="rickshaw-body">
+                                                        <!-- Front Wheel -->
+                                                        <g class="wheel" transform="translate(25, 120)">
+                                                            <circle cx="0" cy="0" r="18" fill="#2c2c2c" stroke="#fff" stroke-width="2"/>
+                                                            <circle cx="0" cy="0" r="11" fill="#444"/>
+                                                            <circle cx="0" cy="0" r="4" fill="#fff"/>
+                                                            <line x1="0" y1="-18" x2="0" y2="18" stroke="#fff" stroke-width="1.5"/>
+                                                            <line x1="-18" y1="0" x2="18" y2="0" stroke="#fff" stroke-width="1.5"/>
+                                                        </g>
+                                                        
+                                                        <!-- Bicycle Frame -->
+                                                        <line x1="25" y1="120" x2="45" y2="75" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
+                                                        <line x1="45" y1="75" x2="65" y2="95" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
+                                                        <line x1="45" y1="75" x2="55" y2="55" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
+                                                        
+                                                        <!-- Handlebars -->
+                                                        <line x1="55" y1="55" x2="70" y2="42" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
+                                                        <line x1="70" y1="42" x2="70" y2="38" stroke="#2c2c2c" stroke-width="4" stroke-linecap="round"/>
+                                                        <line x1="65" y1="40" x2="75" y2="40" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
+                                                        
+                                                        <!-- Driver Seat -->
+                                                        <ellipse cx="45" cy="75" rx="9" ry="5" fill="#2c2c2c"/>
+                                                        
+                                                        <!-- Connection Bar -->
+                                                        <line x1="65" y1="95" x2="75" y2="95" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round"/>
+                                                        
+                                                        <!-- Passenger Carriage Body -->
+                                                        <rect x="75" y="95" width="95" height="40" rx="3" fill="#fff" stroke="#2c2c2c" stroke-width="2.5"/>
+                                                        
+                                                        <!-- High Arched Roof/Canopy -->
+                                                        <path d="M 75 95 Q 122.5 45, 170 95" stroke="#F42A41" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                                        <path d="M 78 95 Q 122.5 50, 167 95" stroke="#F42A41" stroke-width="3" fill="none"/>
+                                                        <path d="M 80 95 Q 122.5 55, 165 95 L 165 100 L 80 100 Z" fill="#F42A41" opacity="0.35"/>
+                                                        
+                                                        <!-- Carriage Sides -->
+                                                        <line x1="75" y1="95" x2="75" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
+                                                        <line x1="170" y1="95" x2="170" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
+                                                        <line x1="75" y1="135" x2="170" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
+                                                        
+                                                        <!-- Rear Wheels -->
+                                                        <g class="wheel" transform="translate(100, 140)">
+                                                            <circle cx="0" cy="0" r="18" fill="#2c2c2c" stroke="#fff" stroke-width="2"/>
+                                                            <circle cx="0" cy="0" r="11" fill="#444"/>
+                                                            <circle cx="0" cy="0" r="4" fill="#fff"/>
+                                                            <line x1="0" y1="-18" x2="0" y2="18" stroke="#fff" stroke-width="1.5"/>
+                                                            <line x1="-18" y1="0" x2="18" y2="0" stroke="#fff" stroke-width="1.5"/>
+                                                        </g>
+                                                        
+                                                        <g class="wheel" transform="translate(135, 140)">
+                                                            <circle cx="0" cy="0" r="18" fill="#2c2c2c" stroke="#fff" stroke-width="2"/>
+                                                            <circle cx="0" cy="0" r="11" fill="#444"/>
+                                                            <circle cx="0" cy="0" r="4" fill="#fff"/>
+                                                            <line x1="0" y1="-18" x2="0" y2="18" stroke="#fff" stroke-width="1.5"/>
+                                                            <line x1="-18" y1="0" x2="18" y2="0" stroke="#fff" stroke-width="1.5"/>
+                                                        </g>
+                                                    </svg>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
+                        @endforeach
                     </div>
+                    
+                    <!-- Carousel Navigation -->
+                    @if($popups->count() > 1)
+                    <div class="carousel-controls">
+                        <button class="carousel-btn prev" onclick="changeSlide(-1)">❮</button>
+                        <div class="carousel-indicators">
+                            @foreach($popups as $index => $popup)
+                            <span class="indicator {{ $index === 0 ? 'active' : '' }}" onclick="goToSlide({{ $index }})"></span>
+                            @endforeach
+                        </div>
+                        <button class="carousel-btn next" onclick="changeSlide(1)">❯</button>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1194,16 +1437,21 @@
             document.getElementById('searchSection').classList.remove('hidden');
         }
         
-        // Show campaign modal on page load (only if popup exists)
-        @if($popup)
+        // Show campaign modal on page load (only if popups exist)
+        @if($popups && $popups->count() > 0)
         window.addEventListener('load', function() {
             setTimeout(function() {
                 const modal = document.getElementById('campaignModal');
                 if (modal) {
                     modal.classList.add('show');
+                    console.log('Popup modal shown with', {{ $popups->count() }}, 'popup(s)');
+                } else {
+                    console.error('Popup modal element not found');
                 }
             }, 500);
         });
+        @else
+        console.log('No active popups to display');
         @endif
         
         // Close modal function
@@ -1212,11 +1460,84 @@
         }
         
         // Close modal when clicking outside
-        document.getElementById('campaignModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeCampaignModal();
+        const campaignModal = document.getElementById('campaignModal');
+        if (campaignModal) {
+            campaignModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCampaignModal();
+                }
+            });
+        }
+        
+        // Carousel functionality
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.popup-slide');
+        const indicators = document.querySelectorAll('.indicator');
+        const totalSlides = slides.length;
+        
+        function showSlide(index) {
+            // Remove active class from all slides and indicators
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            // Add active class to current slide and indicator
+            if (slides[index]) {
+                slides[index].classList.add('active');
             }
+            if (indicators[index]) {
+                indicators[index].classList.add('active');
+            }
+            
+            currentSlide = index;
+        }
+        
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            } else if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            }
+            showSlide(currentSlide);
+        }
+        
+        function goToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                showSlide(index);
+            }
+        }
+        
+        // Auto-slide functionality (optional - slides every 5 seconds)
+        @if($popups && $popups->count() > 1)
+        let autoSlideInterval;
+        function startAutoSlide() {
+            autoSlideInterval = setInterval(() => {
+                changeSlide(1);
+            }, 5000); // Change slide every 5 seconds
+        }
+        
+        function stopAutoSlide() {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+            }
+        }
+        
+        // Start auto-slide when modal is shown
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (document.getElementById('campaignModal')?.classList.contains('show')) {
+                    startAutoSlide();
+                }
+            }, 500);
         });
+        
+        // Pause auto-slide on hover
+        const carouselContainer = document.querySelector('.popup-carousel-container');
+        if (carouselContainer) {
+            carouselContainer.addEventListener('mouseenter', stopAutoSlide);
+            carouselContainer.addEventListener('mouseleave', startAutoSlide);
+        }
+        @endif
     </script>
     
     <!-- PWA Scripts -->

@@ -31,14 +31,25 @@ class PopupController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $format = $request->input('format', '1');
+        
+        $rules = [
+            'format' => 'required|in:1,2',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'message' => 'required|string',
             'is_active' => 'boolean',
-        ]);
+        ];
+        
+        // Format 1 requires message, allows icon_image and subtitle
+        if ($format == '1') {
+            $rules['message'] = 'required|string';
+            $rules['icon_image'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+            $rules['subtitle'] = 'nullable|string|max:255';
+        }
+        // Format 2 only requires image and title
+        
+        $validated = $request->validate($rules);
+        $validated['format'] = $format;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -51,10 +62,18 @@ class PopupController extends Controller
         }
 
         $validated['is_active'] = $request->has('is_active');
-
-        // If this popup is being set as active, deactivate all others
-        if ($validated['is_active']) {
-            Popup::ensureOnlyOneActive();
+        
+        // Set default values for format 2 - only set if not already in validated
+        if ($format == '2') {
+            if (!isset($validated['message'])) {
+                $validated['message'] = null;
+            }
+            if (!isset($validated['subtitle'])) {
+                $validated['subtitle'] = null;
+            }
+            if (!isset($validated['icon_image'])) {
+                $validated['icon_image'] = null;
+            }
         }
 
         Popup::create($validated);
@@ -84,14 +103,24 @@ class PopupController extends Controller
      */
     public function update(Request $request, Popup $popup)
     {
-        $validated = $request->validate([
+        $format = $request->input('format', $popup->format ?? '1');
+        
+        $rules = [
+            'format' => 'required|in:1,2',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'message' => 'required|string',
             'is_active' => 'boolean',
-        ]);
+        ];
+        
+        // Format 1 requires message, allows icon_image and subtitle
+        if ($format == '1') {
+            $rules['message'] = 'required|string';
+            $rules['icon_image'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+            $rules['subtitle'] = 'nullable|string|max:255';
+        }
+        
+        $validated = $request->validate($rules);
+        $validated['format'] = $format;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -112,10 +141,23 @@ class PopupController extends Controller
         }
 
         $validated['is_active'] = $request->has('is_active');
-
-        // If this popup is being set as active, deactivate all others
-        if ($validated['is_active']) {
-            Popup::ensureOnlyOneActive($popup->id);
+        
+        // Set default values for format 2 - ensure null values for fields not used in Format 2
+        if ($format == '2') {
+            // Only set to null if not already set (to avoid overwriting if somehow included)
+            if (!array_key_exists('message', $validated)) {
+                $validated['message'] = null;
+            }
+            if (!array_key_exists('subtitle', $validated)) {
+                $validated['subtitle'] = null;
+            }
+            // Only delete icon_image if format changed from 1 to 2
+            if ($popup->format == '1' && $format == '2' && $popup->icon_image) {
+                Storage::disk('public')->delete($popup->icon_image);
+            }
+            if (!array_key_exists('icon_image', $validated)) {
+                $validated['icon_image'] = null;
+            }
         }
 
         $popup->update($validated);

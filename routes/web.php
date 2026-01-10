@@ -4,9 +4,9 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $popup = \App\Models\Popup::getActive();
+    $popups = \App\Models\Popup::getActive();
     $settings = \App\Models\HomePageSetting::getSettings();
-    return view('home', compact('popup', 'settings'));
+    return view('home', compact('popups', 'settings'));
 });
 
 // QR Code scan tracking
