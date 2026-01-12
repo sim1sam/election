@@ -869,8 +869,13 @@
             }
             
             .carousel-controls {
-                bottom: 5px;
+                bottom: 15px;
                 padding: 0 15px;
+            }
+            
+            /* Add padding to modal content on mobile to prevent overlap */
+            .modal-content {
+                padding-bottom: 60px;
             }
             
             .carousel-btn {
@@ -886,16 +891,16 @@
                 padding: 6px;
                 align-items: center;
                 justify-content: center;
-                overflow: hidden;
+                overflow: visible;
             }
             
             .modal-content {
-                padding: 38px 15px 20px 15px;
+                padding: 38px 15px 50px 15px;
                 max-width: 94%;
                 width: 94%;
                 margin: auto;
                 max-height: calc(100vh - 12px);
-                overflow: hidden;
+                overflow: visible;
                 display: flex;
                 flex-direction: column;
             }
@@ -917,9 +922,10 @@
             }
             
             .carousel-controls {
-                bottom: 5px;
+                bottom: -22px;
                 gap: 10px;
                 padding: 0 10px;
+                position: absolute;
             }
             
             .carousel-btn {
