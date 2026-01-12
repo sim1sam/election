@@ -562,8 +562,8 @@
         }
         
         .format-2-title h3 {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 1.3rem;
+            font-weight: 600;
             color: #006A4E;
             margin: 0;
             line-height: 1.3;
@@ -865,7 +865,7 @@
             }
             
             .format-2-title h3 {
-                font-size: 1.8rem;
+                font-size: 1.2rem;
             }
             
             .carousel-controls {
@@ -909,7 +909,7 @@
             }
             
             .format-2-title h3 {
-                font-size: 1.5rem;
+                font-size: 1.1rem;
             }
             
             .popup-format-2 {
