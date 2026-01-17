@@ -1146,7 +1146,7 @@
                                 <div class="popup-format-2">
                                     <div class="format-2-image">
                                         @if($popup->image)
-                                            <img src="{{ asset('storage/' . $popup->image) }}" alt="{{ $popup->title }}" />
+                                            <img src="{{ asset($popup->image) }}" alt="{{ $popup->title }}" />
                                         @else
                                             <div class="image-placeholder">📷</div>
                                         @endif
@@ -1160,7 +1160,7 @@
                                 <div class="campaign-popup">
                                     <div class="campaign-image">
                                         @if($popup->image)
-                                            <img src="{{ asset('storage/' . $popup->image) }}" alt="Campaign" />
+                                            <img src="{{ asset($popup->image) }}" alt="Campaign" />
                                         @else
                                             <div class="campaign-image-placeholder">👤</div>
                                         @endif
@@ -1176,7 +1176,7 @@
                                         <div class="rickshaw-icon">
                                             <div class="rickshaw-container">
                                                 @if($popup->icon_image)
-                                                    <img src="{{ asset('storage/' . $popup->icon_image) }}" alt="Icon" />
+                                                    <img src="{{ asset($popup->icon_image) }}" alt="Icon" />
                                                 @else
                                                     <!-- Default SVG Rickshaw Icon -->
                                                     <svg viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" class="rickshaw-body">

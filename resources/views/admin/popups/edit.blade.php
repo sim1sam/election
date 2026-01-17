@@ -56,7 +56,7 @@
                     <label for="image">Person/Candidate Image</label>
                     @if($popup->image)
                         <div class="mb-2">
-                            <img src="{{ Storage::url($popup->image) }}" alt="Current image" style="max-width: 200px; max-height: 200px;" class="img-thumbnail">
+                            <img src="{{ asset($popup->image) }}" alt="Current image" style="max-width: 200px; max-height: 200px;" class="img-thumbnail">
                             <p class="text-muted">Current image</p>
                         </div>
                     @endif
@@ -72,7 +72,7 @@
                     <label for="icon_image">Icon/Symbol Image (PNG)</label>
                     @if($popup->icon_image)
                         <div class="mb-2">
-                            <img src="{{ Storage::url($popup->icon_image) }}" alt="Current icon" style="max-width: 200px; max-height: 200px;" class="img-thumbnail">
+                            <img src="{{ asset($popup->icon_image) }}" alt="Current icon" style="max-width: 200px; max-height: 200px;" class="img-thumbnail">
                             <p class="text-muted">Current icon</p>
                         </div>
                     @endif

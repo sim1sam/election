@@ -47,7 +47,7 @@
                             </td>
                             <td>
                                 @if($popup->image)
-                                    <img src="{{ Storage::url($popup->image) }}" alt="Image" style="max-width: 50px; max-height: 50px;">
+                                    <img src="{{ asset($popup->image) }}" alt="Image" style="max-width: 50px; max-height: 50px;">
                                 @else
                                     <span class="text-muted">No image</span>
                                 @endif
@@ -55,7 +55,7 @@
                             <td>
                                 @if($popup->format == '1')
                                     @if($popup->icon_image)
-                                        <img src="{{ Storage::url($popup->icon_image) }}" alt="Icon" style="max-width: 50px; max-height: 50px;">
+                                        <img src="{{ asset($popup->icon_image) }}" alt="Icon" style="max-width: 50px; max-height: 50px;">
                                     @else
                                         <span class="text-muted">No icon</span>
                                     @endif

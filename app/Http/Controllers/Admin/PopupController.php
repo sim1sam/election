@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Popup;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class PopupController extends Controller
 {
@@ -51,14 +50,20 @@ class PopupController extends Controller
         $validated = $request->validate($rules);
         $validated['format'] = $format;
 
-        // Handle image upload
+        // Handle image upload - save directly to public/popups
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('popups', 'public');
+            $image = $request->file('image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('popups'), $imageName);
+            $validated['image'] = 'popups/' . $imageName;
         }
 
-        // Handle icon image upload
+        // Handle icon image upload - save directly to public/popups
         if ($request->hasFile('icon_image')) {
-            $validated['icon_image'] = $request->file('icon_image')->store('popups', 'public');
+            $iconImage = $request->file('icon_image');
+            $iconName = time() . '_' . uniqid() . '.' . $iconImage->getClientOriginalExtension();
+            $iconImage->move(public_path('popups'), $iconName);
+            $validated['icon_image'] = 'popups/' . $iconName;
         }
 
         $validated['is_active'] = $request->has('is_active');
@@ -122,22 +127,28 @@ class PopupController extends Controller
         $validated = $request->validate($rules);
         $validated['format'] = $format;
 
-        // Handle image upload
+        // Handle image upload - save directly to public/popups
         if ($request->hasFile('image')) {
             // Delete old image
-            if ($popup->image) {
-                Storage::disk('public')->delete($popup->image);
+            if ($popup->image && file_exists(public_path($popup->image))) {
+                unlink(public_path($popup->image));
             }
-            $validated['image'] = $request->file('image')->store('popups', 'public');
+            $image = $request->file('image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('popups'), $imageName);
+            $validated['image'] = 'popups/' . $imageName;
         }
 
-        // Handle icon image upload
+        // Handle icon image upload - save directly to public/popups
         if ($request->hasFile('icon_image')) {
             // Delete old icon image
-            if ($popup->icon_image) {
-                Storage::disk('public')->delete($popup->icon_image);
+            if ($popup->icon_image && file_exists(public_path($popup->icon_image))) {
+                unlink(public_path($popup->icon_image));
             }
-            $validated['icon_image'] = $request->file('icon_image')->store('popups', 'public');
+            $iconImage = $request->file('icon_image');
+            $iconName = time() . '_' . uniqid() . '.' . $iconImage->getClientOriginalExtension();
+            $iconImage->move(public_path('popups'), $iconName);
+            $validated['icon_image'] = 'popups/' . $iconName;
         }
 
         $validated['is_active'] = $request->has('is_active');
@@ -152,8 +163,8 @@ class PopupController extends Controller
                 $validated['subtitle'] = null;
             }
             // Only delete icon_image if format changed from 1 to 2
-            if ($popup->format == '1' && $format == '2' && $popup->icon_image) {
-                Storage::disk('public')->delete($popup->icon_image);
+            if ($popup->format == '1' && $format == '2' && $popup->icon_image && file_exists(public_path($popup->icon_image))) {
+                unlink(public_path($popup->icon_image));
             }
             if (!array_key_exists('icon_image', $validated)) {
                 $validated['icon_image'] = null;
@@ -171,12 +182,12 @@ class PopupController extends Controller
      */
     public function destroy(Popup $popup)
     {
-        // Delete images
-        if ($popup->image) {
-            Storage::disk('public')->delete($popup->image);
+        // Delete images from public folder
+        if ($popup->image && file_exists(public_path($popup->image))) {
+            unlink(public_path($popup->image));
         }
-        if ($popup->icon_image) {
-            Storage::disk('public')->delete($popup->icon_image);
+        if ($popup->icon_image && file_exists(public_path($popup->icon_image))) {
+            unlink(public_path($popup->icon_image));
         }
 
         $popup->delete();

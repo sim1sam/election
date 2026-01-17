@@ -18,8 +18,8 @@ class PopupController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'image' => $popup->image ? asset('storage/' . $popup->image) : null,
-                    'icon_image' => $popup->icon_image ? asset('storage/' . $popup->icon_image) : null,
+                    'image' => $popup->image ? asset($popup->image) : null,
+                    'icon_image' => $popup->icon_image ? asset($popup->icon_image) : null,
                     'title' => $popup->title,
                     'subtitle' => $popup->subtitle,
                     'message' => $popup->message,
