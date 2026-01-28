@@ -171,11 +171,16 @@ class VoterController extends Controller
 
     /**
      * Handle CSV file upload and import
+     * Optimized for large files (5k+ rows) using chunked processing
      */
     public function importCsv(Request $request)
     {
+        // Increase memory limit and execution time for large uploads
+        ini_set('memory_limit', '512M');
+        set_time_limit(600); // 10 minutes
+        
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:10240', // 10MB max
+            'csv_file' => 'required|file|mimes:csv,txt|max:51200', // 50MB max (increased from 10MB)
             'polling_center_name' => 'required|string|max:255',
             'ward_number' => 'required|string|max:255',
             'voter_area_number' => 'required|string|max:255',
@@ -192,12 +197,7 @@ class VoterController extends Controller
         $file = $request->file('csv_file');
         $path = $file->getRealPath();
         
-        $data = array_map('str_getcsv', file($path));
-        
-        // Remove header row
-        $header = array_shift($data);
-        
-        // Expected columns (in order) - removed polling_center_name, ward_number, voter_area_number
+        // Expected columns (in order)
         $expectedColumns = [
             'name', 'voter_number', 'father_name', 'mother_name', 
             'occupation', 'address', 'voter_serial_number', 'date_of_birth'
@@ -209,11 +209,26 @@ class VoterController extends Controller
             'duplicates' => 0,
         ];
         
-        DB::beginTransaction();
+        // Process in chunks to avoid memory issues
+        $chunkSize = 500; // Process 500 rows at a time
+        $batch = [];
+        $rowNumber = 1; // Track row number (1 = header)
+        $processedRows = 0;
+        
+        // Open file for streaming (memory efficient)
+        $handle = fopen($path, 'r');
+        if ($handle === false) {
+            return redirect()->route('admin.voters.index')
+                ->with('error', 'Failed to open CSV file.');
+        }
+        
+        // Skip header row
+        $header = fgetcsv($handle);
+        $rowNumber++;
         
         try {
-            foreach ($data as $rowIndex => $row) {
-                $rowNumber = $rowIndex + 2; // +2 because header is row 1, and array is 0-indexed
+            while (($row = fgetcsv($handle)) !== false) {
+                $rowNumber++;
                 
                 // Skip empty rows
                 if (empty(array_filter($row))) {
@@ -226,7 +241,6 @@ class VoterController extends Controller
                     $value = isset($row[$index]) ? trim($row[$index]) : null;
                     
                     // Remove single quote or tab prefix (used to force Excel to treat as text)
-                    // Excel adds single quote to preserve leading zeros
                     if ($value !== null) {
                         $value = ltrim($value, "'\t");
                         
@@ -253,121 +267,72 @@ class VoterController extends Controller
                     continue;
                 }
                 
-                // Check for duplicate voter number
-                if (Voter::where('voter_number', $voterData['voter_number'])->exists()) {
-                    $results['duplicates']++;
-                    $results['errors'][] = "Row {$rowNumber}: Voter number '{$voterData['voter_number']}' already exists.";
-                    continue;
-                }
-                
                 // Parse date if provided
                 if (!empty($voterData['date_of_birth'])) {
                     try {
                         $dateValue = trim($voterData['date_of_birth']);
                         $date = null;
                         
-                        // Check if it's an Excel serial date (numeric value like 33603)
-                        // Excel serial dates: 1 = 1900-01-01, but Excel incorrectly treats 1900 as leap year
-                        // So we need to subtract 2 days from the calculation
+                        // Check if it's an Excel serial date
                         if (is_numeric($dateValue) && (float)$dateValue > 1 && (float)$dateValue < 1000000 && !preg_match('/[\/\-]/', $dateValue)) {
-                            // Convert Excel serial date to actual date
-                            // Excel epoch starts at 1900-01-01 (day 1)
-                            // But Excel incorrectly treats 1900 as a leap year, so we adjust
                             $excelEpoch = \Carbon\Carbon::create(1899, 12, 30, 0, 0, 0);
                             $days = (int)$dateValue;
-                            $date = $excelEpoch->copy()->addDays($days - 1); // Subtract 1 because Excel day 1 = 1900-01-01
+                            $date = $excelEpoch->copy()->addDays($days - 1);
                         } else {
                             // Handle date strings - prioritize Bangladesh format (dd/mm/yyyy)
-                            
-                            // First, try to parse as dd/mm/yyyy (Bangladesh format - PRIORITY)
                             if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dateValue, $matches)) {
                                 $first = (int)$matches[1];
                                 $second = (int)$matches[2];
                                 $year = (int)$matches[3];
                                 
-                                // If first part > 12, it must be dd/mm/yyyy (day cannot be > 31, but month can't be > 12)
                                 if ($first > 12) {
-                                    // Definitely dd/mm/yyyy format
                                     $day = $first;
                                     $month = $second;
                                     $date = \Carbon\Carbon::create($year, $month, $day);
                                 } elseif ($second > 12) {
-                                    // Definitely mm/dd/yyyy format (second part is day > 12)
                                     $month = $first;
                                     $day = $second;
                                     $date = \Carbon\Carbon::create($year, $month, $day);
                                 } else {
-                                    // Ambiguous: both parts <= 12
-                                    // Prioritize dd/mm/yyyy (Bangladesh format) over mm/dd/yyyy (US format)
                                     try {
-                                        // Try as dd/mm/yyyy first
                                         $day = $first;
                                         $month = $second;
                                         $date = \Carbon\Carbon::create($year, $month, $day);
                                     } catch (\Exception $e) {
-                                        // If invalid (e.g., Feb 30), try as mm/dd/yyyy
                                         $month = $first;
                                         $day = $second;
                                         $date = \Carbon\Carbon::create($year, $month, $day);
                                     }
                                 }
                             } else {
-                                // Try standard date formats
                                 $formats = [
-                                    'd/m/Y',      // 01/03/1992 (dd/mm/yyyy - Bangladesh format)
-                                    'd-m-Y',      // 01-03-1992 (dd-mm-yyyy)
-                                    'Y-m-d',      // 1992-01-03 (ISO format)
-                                    'Y/m/d',      // 1992/01/03
-                                    'm/d/Y',      // 01/03/1992 (mm/dd/yyyy - US format)
-                                    'n/j/Y',      // 1/3/1992 (m/d/yyyy - US format without leading zeros)
+                                    'd/m/Y', 'd-m-Y', 'Y-m-d', 'Y/m/d', 'm/d/Y', 'n/j/Y',
                                 ];
                                 
                                 foreach ($formats as $format) {
                                     try {
                                         $parsedDate = \Carbon\Carbon::createFromFormat($format, $dateValue);
-                                        if ($parsedDate !== false) {
-                                            // Verify the format matches by reformatting
-                                            if ($parsedDate->format($format) === $dateValue) {
-                                                $date = $parsedDate;
-                                                break;
-                                            }
+                                        if ($parsedDate !== false && $parsedDate->format($format) === $dateValue) {
+                                            $date = $parsedDate;
+                                            break;
                                         }
                                     } catch (\Exception $e) {
                                         continue;
                                     }
                                 }
                                 
-                                // Last resort: use Carbon's parse (less reliable)
                                 if (!$date) {
                                     $date = \Carbon\Carbon::parse($dateValue);
                                 }
                             }
                         }
                         
-                        // Validate date is reasonable
-                        if (!$date) {
-                            throw new \Exception("Could not parse date: {$dateValue}");
+                        // Validate date
+                        if (!$date || $date->isFuture() || $date->year < 1900 || $date->year > 2100) {
+                            throw new \Exception("Invalid date: {$dateValue}");
                         }
                         
-                        if ($date->isFuture()) {
-                            throw new \Exception("Date cannot be in the future: {$dateValue}");
-                        }
-                        
-                        if ($date->year < 1900 || $date->year > 2100) {
-                            throw new \Exception("Date year seems invalid: {$dateValue}");
-                        }
-                        
-                        // Store the date in Y-m-d format
-                        $storedDate = $date->format('Y-m-d');
-                        
-                        // Log for debugging (can be removed in production)
-                        Log::info('Date parsed in CSV import', [
-                            'original' => $dateValue,
-                            'parsed' => $storedDate,
-                            'row' => $rowNumber
-                        ]);
-                        
-                        $voterData['date_of_birth'] = $storedDate;
+                        $voterData['date_of_birth'] = $date->format('Y-m-d');
                     } catch (\Exception $e) {
                         $results['errors'][] = "Row {$rowNumber}: Invalid date format for date_of_birth '{$voterData['date_of_birth']}'. Error: " . $e->getMessage() . ". Expected format: DD/MM/YYYY (e.g., 01/03/1992 for 1st March 1992).";
                         continue;
@@ -376,19 +341,34 @@ class VoterController extends Controller
                     $voterData['date_of_birth'] = null;
                 }
                 
-                // Apply common fields to all voters
+                // Apply common fields
                 $voterData = array_merge($voterData, $commonFields);
                 
-                // Create voter
-                try {
-                    Voter::create($voterData);
-                    $results['success']++;
-                } catch (\Exception $e) {
-                    $results['errors'][] = "Row {$rowNumber}: " . $e->getMessage();
+                // Add to batch
+                $batch[] = [
+                    'data' => $voterData,
+                    'row' => $rowNumber
+                ];
+                
+                // Process batch when it reaches chunk size
+                if (count($batch) >= $chunkSize) {
+                    $this->processBatch($batch, $results);
+                    $batch = [];
+                    $processedRows += $chunkSize;
+                    
+                    // Log progress for large files
+                    if ($processedRows % 5000 == 0) {
+                        Log::info("CSV Import Progress: {$processedRows} rows processed");
+                    }
                 }
             }
             
-            DB::commit();
+            // Process remaining batch
+            if (!empty($batch)) {
+                $this->processBatch($batch, $results);
+            }
+            
+            fclose($handle);
             
             $message = "Import completed! Successfully imported {$results['success']} voters.";
             if ($results['duplicates'] > 0) {
@@ -400,12 +380,90 @@ class VoterController extends Controller
             
             return redirect()->route('admin.voters.index')
                 ->with('success', $message)
-                ->with('import_errors', $results['errors']);
+                ->with('import_errors', array_slice($results['errors'], 0, 100)); // Limit errors shown to first 100
                 
         } catch (\Exception $e) {
-            DB::rollBack();
+            fclose($handle);
             return redirect()->route('admin.voters.index')
                 ->with('error', 'Import failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Process a batch of voters efficiently using batch insert
+     */
+    private function processBatch(array $batch, array &$results)
+    {
+        if (empty($batch)) {
+            return;
+        }
+        
+        // Get existing voter numbers to check for duplicates in one query
+        $voterNumbers = array_column(array_column($batch, 'data'), 'voter_number');
+        $existingVoters = Voter::whereIn('voter_number', $voterNumbers)
+            ->pluck('voter_number')
+            ->toArray();
+        
+        // Prepare data for batch insert
+        $insertData = [];
+        $rowMapping = []; // Map voter_number to row number for error reporting
+        $nextId = Voter::getNextSequentialId();
+        
+        foreach ($batch as $item) {
+            $voterData = $item['data'];
+            $rowNumber = $item['row'];
+            
+            // Check for duplicate
+            if (in_array($voterData['voter_number'], $existingVoters)) {
+                $results['duplicates']++;
+                $results['errors'][] = "Row {$rowNumber}: Voter number '{$voterData['voter_number']}' already exists.";
+                continue;
+            }
+            
+            // Add to insert batch
+            $insertData[] = array_merge($voterData, [
+                'id' => $nextId++,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            // Track row number for error reporting
+            $rowMapping[$voterData['voter_number']] = $rowNumber;
+            
+            // Track existing voters to avoid duplicates within same batch
+            $existingVoters[] = $voterData['voter_number'];
+        }
+        
+        if (empty($insertData)) {
+            return;
+        }
+        
+        // Batch insert in chunks of 100 to avoid query size limits
+        $insertChunks = array_chunk($insertData, 100);
+        
+        DB::beginTransaction();
+        try {
+            foreach ($insertChunks as $chunk) {
+                Voter::insert($chunk);
+            }
+            DB::commit();
+            $results['success'] += count($insertData);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Fallback to individual inserts if batch fails
+            foreach ($insertData as $data) {
+                $voterNumber = $data['voter_number'];
+                $rowNumber = $rowMapping[$voterNumber] ?? 'unknown';
+                try {
+                    // Remove id, created_at, updated_at for create() method
+                    $createData = $data;
+                    unset($createData['id'], $createData['created_at'], $createData['updated_at']);
+                    Voter::create($createData);
+                    $results['success']++;
+                } catch (\Exception $e2) {
+                    $results['errors'][] = "Row {$rowNumber}: " . $e2->getMessage();
+                }
+            }
         }
     }
 

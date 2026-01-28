@@ -1,3 +1,20 @@
+# Increase upload limits for large CSV files (5k+ voters)
+# For mod_php (Apache with mod_php)
+<IfModule mod_php.c>
+    php_value upload_max_filesize 50M
+    php_value post_max_size 50M
+    php_value max_execution_time 600
+    php_value max_input_time 600
+    php_value memory_limit 512M
+</IfModule>
+
+# For PHP-FPM (Laragon default), update php.ini instead:
+# upload_max_filesize = 50M
+# post_max_size = 50M
+# max_execution_time = 600
+# max_input_time = 600
+# memory_limit = 512M
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
