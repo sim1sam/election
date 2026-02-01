@@ -64,6 +64,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Home Page Settings
     Route::get('/home-page-settings/edit', [App\Http\Controllers\Admin\HomePageSettingController::class, 'edit'])->name('home-page-settings.edit');
     Route::put('/home-page-settings', [App\Http\Controllers\Admin\HomePageSettingController::class, 'update'])->name('home-page-settings.update');
+
+    // Process queue (run queue:work from admin - for bulk import on live server)
+    Route::get('/queue', [App\Http\Controllers\Admin\QueueController::class, 'index'])->name('queue.index');
+    Route::post('/queue/process', [App\Http\Controllers\Admin\QueueController::class, 'process'])->name('queue.process');
 });
 
 require __DIR__.'/auth.php';

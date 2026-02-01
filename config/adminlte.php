@@ -348,6 +348,12 @@ return [
             'active' => ['admin/voters*'],
         ],
         [
+            'text' => 'Bulk Upload',
+            'url' => 'admin/voters/upload',
+            'icon' => 'fas fa-fw fa-file-upload',
+            'active' => ['admin/voters/upload'],
+        ],
+        [
             'text' => 'Users',
             'url' => '#',
             'icon' => 'fas fa-fw fa-users',
