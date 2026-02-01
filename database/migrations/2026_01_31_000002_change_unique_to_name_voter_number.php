@@ -9,17 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      * Duplicate rule: নাম (Name) + ভোটার নম্বর (Voter Number) together must be unique.
-     * Replaces previous (name, voter_serial_number) unique with (name, voter_number).
      */
     public function up(): void
     {
-        Schema::table('voters', function (Blueprint $table) {
-            $table->dropUnique('voters_name_voter_serial_number_unique');
-        });
+        try {
+            Schema::table('voters', function (Blueprint $table) {
+                $table->dropUnique('voters_name_voter_serial_number_unique');
+            });
+        } catch (\Throwable $e) {
+            // Index may not exist (e.g. never ran that migration), skip
+        }
 
-        Schema::table('voters', function (Blueprint $table) {
-            $table->unique(['name', 'voter_number'], 'voters_name_voter_number_unique');
-        });
+        try {
+            Schema::table('voters', function (Blueprint $table) {
+                $table->unique(['name', 'voter_number'], 'voters_name_voter_number_unique');
+            });
+        } catch (\Throwable $e) {
+            // Already exists, skip
+        }
     }
 
     /**

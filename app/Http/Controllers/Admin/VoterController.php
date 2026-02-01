@@ -56,7 +56,7 @@ class VoterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'voter_number' => 'required|string|max:255|unique:voters,voter_number',
+            'voter_number' => 'required|string|max:255',
             'father_name' => 'nullable|string|max:255',
             'mother_name' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
@@ -65,13 +65,10 @@ class VoterController extends Controller
             'ward_number' => 'nullable|string|max:255',
             'voter_area_number' => 'nullable|string|max:255',
             'voter_serial_number' => 'nullable|string|max:255',
-            // Duplicate when BOTH name AND ভোটার নম্বর (voter number) are same
             'date_of_birth' => 'nullable|date',
-        ], [
-            'voter_number.unique' => __('The combination of name and voter number has already been taken.'),
         ]);
 
-        // Composite unique: (name, voter_number) — same name + same voter number = duplicate
+        // Duplicate only when BOTH name AND voter number are same (same voter number + different name = allowed)
         $name = $validated['name'];
         $voterNumber = NumberConverter::banglaToEnglish($validated['voter_number']);
         if (Voter::where('name', $name)->where('voter_number', $voterNumber)->exists()) {
@@ -124,7 +121,7 @@ class VoterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'voter_number' => 'required|string|max:255|unique:voters,voter_number,' . $voter->id,
+            'voter_number' => 'required|string|max:255',
             'father_name' => 'nullable|string|max:255',
             'mother_name' => 'nullable|string|max:255',
             'occupation' => 'nullable|string|max:255',
@@ -133,13 +130,10 @@ class VoterController extends Controller
             'ward_number' => 'nullable|string|max:255',
             'voter_area_number' => 'nullable|string|max:255',
             'voter_serial_number' => 'nullable|string|max:255',
-            // Duplicate when BOTH name AND ভোটার নম্বর (voter number) are same
             'date_of_birth' => 'nullable|date',
-        ], [
-            'voter_number.unique' => __('The combination of name and voter number has already been taken.'),
         ]);
 
-        // Composite unique: (name, voter_number) — same name + same voter number = duplicate (exclude current)
+        // Duplicate only when BOTH name AND voter number are same (exclude current)
         $name = $validated['name'];
         $voterNumber = NumberConverter::banglaToEnglish($validated['voter_number']);
         if (Voter::where('name', $name)->where('voter_number', $voterNumber)->where('id', '!=', $voter->id)->exists()) {

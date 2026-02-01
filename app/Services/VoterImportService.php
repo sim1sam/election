@@ -148,9 +148,9 @@ class VoterImportService
         if (empty($batch)) {
             return;
         }
+        // Duplicate only when BOTH name AND voter_number are same (not voter_number alone)
         $voterNumbers = array_column(array_column($batch, 'data'), 'voter_number');
         $existingInDb = Voter::whereIn('voter_number', $voterNumbers)->get(['voter_number', 'name']);
-        $existingVoters = $existingInDb->pluck('voter_number')->toArray();
         $pairKey = fn ($name, $voterNo) => trim((string)$name) . "\x00" . trim((string)$voterNo);
         $existingPairs = $existingInDb->map(fn ($v) => $pairKey($v->name, $v->voter_number))->flip()->toArray();
 
@@ -162,15 +162,10 @@ class VoterImportService
         foreach ($batch as $item) {
             $voterData = $item['data'];
             $rowNumber = $item['row'];
-            if (in_array($voterData['voter_number'], $existingVoters)) {
-                $results['duplicates']++;
-                $results['errors'][] = "Row {$rowNumber}: Voter number '{$voterData['voter_number']}' already exists.";
-                continue;
-            }
             $key = $pairKey($voterData['name'], $voterData['voter_number']);
             if (isset($existingPairs[$key]) || isset($batchSeenPairs[$key])) {
                 $results['duplicates']++;
-                $results['errors'][] = "Row {$rowNumber}: Name + voter number already exists.";
+                $results['errors'][] = "Row {$rowNumber}: Name + voter number already exists (duplicate).";
                 continue;
             }
             $batchSeenPairs[$key] = true;
@@ -180,7 +175,6 @@ class VoterImportService
                 'updated_at' => now(),
             ]);
             $rowMapping[$voterData['voter_number']] = $rowNumber;
-            $existingVoters[] = $voterData['voter_number'];
         }
 
         if (empty($insertData)) {
