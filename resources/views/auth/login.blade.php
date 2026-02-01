@@ -24,10 +24,52 @@
 
 @section('auth_body')
     <style>
-        body {
+        body.login-page {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #dc3545 0%, #28a745 100%);
+            background: linear-gradient(135deg, #E0F7FA 0%, #B3E5FC 35%, #81D4FA 70%, #4FC3F7 100%);
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: #0c4a6e;
+        }
+        body.login-page::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                105deg,
+                transparent 0px,
+                transparent 60px,
+                rgba(255,255,255,0.25) 60px,
+                rgba(255,255,255,0.25) 62px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        body.login-page::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                -75deg,
+                transparent 0px,
+                transparent 80px,
+                rgba(14,165,233,0.08) 80px,
+                rgba(14,165,233,0.08) 83px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .login-page .login-box {
+            position: relative;
+            z-index: 1;
         }
         
         .login-box {
@@ -37,71 +79,86 @@
         .login-logo {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: #0c4a6e;
+            text-shadow: none;
             margin-bottom: 20px;
         }
         
         .login-logo a {
-            color: #fff;
+            color: #0c4a6e;
             text-decoration: none;
         }
         
         .login-logo a:hover {
-            color: #fff;
+            color: #0369a1;
         }
         
-        .card {
+        .login-page .card {
             border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            border: none;
+            box-shadow: 0 10px 40px rgba(14, 165, 233, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             overflow: hidden;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
         }
         
-        .card-header {
-            background: linear-gradient(135deg, #dc3545 0%, #28a745 100%);
+        .login-page .card-header {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
             color: #fff;
             border: none;
             padding: 25px;
             text-align: center;
         }
         
-        .card-header h4 {
+        .login-page .card-header .card-title,
+        .login-page .card-header h4 {
             margin: 0;
             font-weight: 600;
             font-size: 1.5rem;
+            color: #fff;
         }
         
-        .card-body {
+        .login-page .card-body {
             padding: 30px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9);
         }
         
-        .input-group-text {
-            background: linear-gradient(135deg, #dc3545 0%, #28a745 100%);
+        .login-page .card-footer {
+            background: rgba(255, 255, 255, 0.85);
+            border-top: 1px solid rgba(14, 165, 233, 0.2);
+        }
+        
+        .login-page .input-group-text {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
             color: #fff;
             border: none;
             border-radius: 5px 0 0 5px;
         }
         
-        .form-control {
-            border: 2px solid #e0e0e0;
+        .login-page .form-control {
+            border: 2px solid rgba(14, 165, 233, 0.3);
             border-radius: 0 5px 5px 0;
             padding: 12px 15px;
             transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            color: #0c4a6e;
         }
         
-        .form-control:focus {
-            border-color: #28a745;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        .login-page .form-control:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+        }
+        
+        .login-page .form-control::placeholder {
+            color: rgba(12, 74, 110, 0.5);
         }
         
         .input-group {
             margin-bottom: 20px;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, #dc3545 0%, #28a745 100%);
+        .login-page .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
             border: none;
             border-radius: 5px;
             padding: 12px 30px;
@@ -110,29 +167,34 @@
             transition: all 0.3s ease;
             width: 100%;
             margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
         }
         
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #c82333 0%, #218838 100%);
+        .login-page .btn-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
         }
         
-        .btn-primary:active {
+        .login-page .btn-primary:active {
             transform: translateY(0);
         }
         
-        .icheck-primary input[type="checkbox"]:checked + label::before {
-            background-color: #28a745;
-            border-color: #28a745;
+        .login-page .icheck-primary input[type="checkbox"]:checked + label::before {
+            background-color: #0ea5e9;
+            border-color: #0ea5e9;
         }
         
-        .icheck-primary input[type="checkbox"]:checked + label::after {
+        .login-page .icheck-primary input[type="checkbox"]:checked + label::after {
             color: #fff;
         }
         
+        .login-page .icheck-primary label {
+            color: #0c4a6e;
+        }
+        
         .login-box-msg {
-            color: #333;
+            color: #0c4a6e;
             font-weight: 500;
             margin-bottom: 25px;
         }
@@ -159,31 +221,14 @@
             border-left: 4px solid #28a745;
         }
         
-        a {
-            color: #28a745;
+        .login-page a {
+            color: #0369a1;
             transition: color 0.3s ease;
         }
         
-        a:hover {
-            color: #dc3545;
+        .login-page a:hover {
+            color: #0ea5e9;
             text-decoration: none;
-        }
-        
-        .login-page {
-            background: linear-gradient(135deg, #dc3545 0%, #28a745 100%);
-        }
-        
-        .login-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(220, 53, 69, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(40, 167, 69, 0.3) 0%, transparent 50%);
-            pointer-events: none;
         }
     </style>
 
@@ -244,21 +289,4 @@
 @stop
 
 @section('auth_footer')
-    {{-- Password reset link --}}
-    @if($passResetUrl)
-        <p class="my-0">
-            <a href="{{ $passResetUrl }}" style="color: #28a745;">
-                <i class="fas fa-key"></i> {{ __('adminlte::adminlte.i_forgot_my_password') }}
-            </a>
-        </p>
-    @endif
-
-    {{-- Register link --}}
-    @if($registerUrl)
-        <p class="my-0">
-            <a href="{{ $registerUrl }}" style="color: #dc3545;">
-                <i class="fas fa-user-plus"></i> {{ __('adminlte::adminlte.register_a_new_membership') }}
-            </a>
-        </p>
-    @endif
 @stop
