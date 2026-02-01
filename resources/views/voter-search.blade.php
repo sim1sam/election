@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#006A4E">
+    <meta name="theme-color" content="#87CEEB">
     <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য খুঁজুন">
     <title>ভোটার তথ্য খুঁজুন</title>
     <link rel="manifest" href="/manifest.json">
@@ -22,25 +22,85 @@
         
         body {
             font-family: 'Noto Sans Bengali', sans-serif;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: linear-gradient(135deg, #E0F7FA 0%, #B3E5FC 35%, #81D4FA 70%, #4FC3F7 100%);
             min-height: 100vh;
-            color: #fff;
+            color: #0c4a6e;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                105deg,
+                transparent 0px,
+                transparent 60px,
+                rgba(255,255,255,0.25) 60px,
+                rgba(255,255,255,0.25) 62px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                -75deg,
+                transparent 0px,
+                transparent 80px,
+                rgba(14,165,233,0.08) 80px,
+                rgba(14,165,233,0.08) 83px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        .abstract-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .abstract-bg .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.2), transparent);
+        }
+        .abstract-bg .line-1 { width: 120%; height: 2px; top: 18%; left: -10%; transform: rotate(-25deg); }
+        .abstract-bg .line-2 { width: 100%; height: 2px; top: 35%; left: 0; transform: rotate(15deg); background: linear-gradient(90deg, transparent, rgba(56,189,248,0.18), transparent); }
+        .abstract-bg .line-3 { width: 110%; height: 2px; bottom: 30%; right: -5%; transform: rotate(-12deg); background: linear-gradient(90deg, transparent, rgba(129,212,250,0.2), transparent); }
+        .abstract-bg .line-4 { width: 90%; height: 2px; bottom: 15%; left: 5%; transform: rotate(8deg); }
+        .abstract-bg .line-5 { width: 130%; height: 2px; top: 55%; left: -15%; transform: rotate(5deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); }
+        .abstract-bg .line-6 { width: 100%; height: 1px; top: 75%; left: 0; transform: rotate(-18deg); background: linear-gradient(90deg, transparent, rgba(14,165,233,0.12), transparent); }
+        .abstract-bg .line-7 { width: 80%; height: 2px; top: 25%; right: 0; transform: rotate(22deg); }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         .header {
             text-align: center;
             padding: 30px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             position: relative;
         }
         
@@ -48,8 +108,8 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(14, 165, 233, 0.25);
+            border: 2px solid rgba(14, 165, 233, 0.5);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -58,20 +118,20 @@
             display: flex !important;
             align-items: center;
             justify-content: center;
-            color: #fff !important;
+            color: #0c4a6e !important;
             text-decoration: none;
             font-size: 1.5rem;
             transition: all 0.3s ease;
             cursor: pointer;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 10px rgba(14, 165, 233, 0.25);
         }
         
         .home-button:hover {
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(14, 165, 233, 0.4);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35);
+            border-color: rgba(14, 165, 233, 0.7);
         }
         
         .home-button i {
@@ -96,16 +156,17 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #0c4a6e;
         }
         
         .election-info-section {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
         }
         
         .election-info-section h2 {
@@ -113,7 +174,7 @@
             font-weight: 700;
             margin-bottom: 25px;
             text-align: center;
-            color: #fff;
+            color: #0c4a6e;
         }
         
         .election-info-grid {
@@ -123,10 +184,10 @@
         }
         
         .election-info-item {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.6);
             padding: 20px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(14, 165, 233, 0.2);
         }
         
         .election-info-item label {
@@ -134,24 +195,23 @@
             font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 8px;
-            opacity: 0.9;
-            color: rgba(255, 255, 255, 0.9);
+            color: #0369a1;
         }
         
         .election-info-item .value {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #fff;
+            color: #0c4a6e;
         }
         
         .search-section {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 40px 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
         }
         
         .search-header {
@@ -163,11 +223,12 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #0c4a6e;
         }
         
         .search-subtitle {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: #0369a1;
             margin-top: 10px;
         }
         
@@ -177,9 +238,10 @@
         }
         
         .search-form {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.5);
             padding: 30px;
             border-radius: 15px;
+            border: 1px solid rgba(14, 165, 233, 0.2);
         }
         
         .form-row {
@@ -198,32 +260,32 @@
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 8px;
-            opacity: 0.9;
+            color: #0c4a6e;
         }
         
         .form-control {
             padding: 12px 15px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(14, 165, 233, 0.3);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.8);
+            color: #0c4a6e;
             font-size: 1rem;
             font-family: 'Noto Sans Bengali', sans-serif;
         }
         
         .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(12, 74, 110, 0.5);
         }
         
         .form-control:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.15);
+            border-color: #0ea5e9;
+            background: #fff;
         }
         
         .btn-search {
             padding: 12px 30px;
-            background: linear-gradient(135deg, #F42A41 0%, #006A4E 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
             border: none;
             border-radius: 8px;
             color: #fff;
@@ -233,11 +295,12 @@
             transition: all 0.3s ease;
             white-space: nowrap;
             font-family: 'Noto Sans Bengali', sans-serif;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
         }
         
         .btn-search:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
         }
         
         .btn-search:active {
@@ -696,6 +759,15 @@
     </script>
 </head>
 <body>
+    <div class="abstract-bg" aria-hidden="true">
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+        <div class="line line-3"></div>
+        <div class="line line-4"></div>
+        <div class="line line-5"></div>
+        <div class="line line-6"></div>
+        <div class="line line-7"></div>
+    </div>
     <div class="container">
         <div class="header">
             <a href="{{ url('/') }}" class="home-button" title="হোম পেজে যান">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#006A4E">
+    <meta name="theme-color" content="#87CEEB">
     <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য">
     <title>ঢাকা–১৩ আসনের ভোটারদের তথ্য</title>
     <link rel="manifest" href="/manifest.json">
@@ -20,31 +20,92 @@
         
         body {
             font-family: 'Noto Sans Bengali', sans-serif;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: linear-gradient(135deg, #E0F7FA 0%, #B3E5FC 35%, #81D4FA 70%, #4FC3F7 100%);
             min-height: 100vh;
-            color: #fff;
+            color: #0c4a6e;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                105deg,
+                transparent 0px,
+                transparent 60px,
+                rgba(255,255,255,0.25) 60px,
+                rgba(255,255,255,0.25) 62px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                -75deg,
+                transparent 0px,
+                transparent 80px,
+                rgba(14,165,233,0.08) 80px,
+                rgba(14,165,233,0.08) 83px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        .abstract-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .abstract-bg .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.2), transparent);
+        }
+        .abstract-bg .line-1 { width: 120%; height: 2px; top: 18%; left: -10%; transform: rotate(-25deg); }
+        .abstract-bg .line-2 { width: 100%; height: 2px; top: 35%; left: 0; transform: rotate(15deg); background: linear-gradient(90deg, transparent, rgba(56,189,248,0.18), transparent); }
+        .abstract-bg .line-3 { width: 110%; height: 2px; bottom: 30%; right: -5%; transform: rotate(-12deg); background: linear-gradient(90deg, transparent, rgba(129,212,250,0.2), transparent); }
+        .abstract-bg .line-4 { width: 90%; height: 2px; bottom: 15%; left: 5%; transform: rotate(8deg); }
+        .abstract-bg .line-5 { width: 130%; height: 2px; top: 55%; left: -15%; transform: rotate(5deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); }
+        .abstract-bg .line-6 { width: 100%; height: 1px; top: 75%; left: 0; transform: rotate(-18deg); background: linear-gradient(90deg, transparent, rgba(14,165,233,0.12), transparent); }
+        .abstract-bg .line-7 { width: 80%; height: 2px; top: 25%; right: 0; transform: rotate(22deg); }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         .header {
             text-align: center;
             padding: 30px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         
         .header h1 {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #0c4a6e;
         }
         
         .search-again {
@@ -55,31 +116,36 @@
         .btn-back {
             display: inline-block;
             padding: 12px 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid rgba(14, 165, 233, 0.4);
             border-radius: 8px;
-            color: #fff;
+            color: #0c4a6e;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(14, 165, 233, 0.2);
         }
         
         .btn-back:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(14, 165, 233, 0.2);
             transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
         
         .results-header {
             text-align: center;
             margin-bottom: 30px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 10px;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);
         }
         
         .results-count {
             font-size: 1.3rem;
             font-weight: 600;
+            color: #0c4a6e;
         }
         
         .voters-grid {
@@ -90,23 +156,23 @@
         }
         
         .voter-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             transition: all 0.3s ease;
         }
         
         .voter-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 30px rgba(14, 165, 233, 0.2);
+            background: rgba(255, 255, 255, 0.85);
         }
         
         .voter-card-header {
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 2px solid rgba(14, 165, 233, 0.3);
             padding-bottom: 15px;
             margin-bottom: 15px;
         }
@@ -115,14 +181,14 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 8px;
-            color: #fff;
+            color: #0c4a6e;
         }
         
         .voter-number {
             font-size: 1.1rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.1);
+            color: #0369a1;
+            background: rgba(14, 165, 233, 0.15);
             padding: 8px 12px;
             border-radius: 5px;
             display: inline-block;
@@ -132,7 +198,6 @@
         .voter-number-label {
             font-weight: 600;
             margin-right: 8px;
-            opacity: 0.9;
         }
         
         .voter-details {
@@ -148,13 +213,14 @@
         .detail-label {
             font-weight: 600;
             min-width: 120px;
-            opacity: 0.8;
             font-size: 0.95rem;
+            color: #0369a1;
         }
         
         .detail-value {
             flex: 1;
             font-size: 1rem;
+            color: #0c4a6e;
         }
         
         .full-address {
@@ -165,13 +231,13 @@
         .full-details {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid rgba(14, 165, 233, 0.3);
             animation: slideDown 0.3s ease;
         }
         
         .details-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(14, 165, 233, 0.2);
             margin-bottom: 15px;
         }
         
@@ -179,7 +245,7 @@
             font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 15px;
-            color: #fff;
+            color: #0c4a6e;
         }
         
         @keyframes slideDown {
@@ -196,7 +262,7 @@
         .btn-view-all {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #F42A41 0%, #006A4E 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
             border: none;
             border-radius: 8px;
             color: #fff;
@@ -206,20 +272,21 @@
             transition: all 0.3s ease;
             margin-top: 15px;
             font-family: 'Noto Sans Bengali', sans-serif;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
         }
         
         .btn-view-all:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
         }
         
         .btn-download {
             width: 100%;
             padding: 12px;
-            background: transparent;
-            border: none;
+            background: rgba(14, 165, 233, 0.2);
+            border: 2px solid rgba(14, 165, 233, 0.4);
             border-radius: 8px;
-            color: #fff;
+            color: #0c4a6e;
             font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
@@ -231,7 +298,8 @@
         
         .btn-download:hover {
             transform: translateY(-2px);
-            color: #fff;
+            background: rgba(14, 165, 233, 0.3);
+            color: #0369a1;
         }
         
         .btn-download i {
@@ -241,24 +309,28 @@
         .no-results {
             text-align: center;
             padding: 60px 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 15px;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.1);
         }
         
         .no-results i {
             font-size: 4rem;
             margin-bottom: 20px;
-            opacity: 0.5;
+            color: #0369a1;
+            opacity: 0.7;
         }
         
         .no-results h2 {
             font-size: 1.8rem;
             margin-bottom: 15px;
+            color: #0c4a6e;
         }
         
         .no-results p {
             font-size: 1.1rem;
-            opacity: 0.8;
+            color: #0369a1;
         }
         
         @media (max-width: 768px) {
@@ -393,6 +465,15 @@
     </style>
 </head>
 <body>
+    <div class="abstract-bg" aria-hidden="true">
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+        <div class="line line-3"></div>
+        <div class="line line-4"></div>
+        <div class="line line-5"></div>
+        <div class="line line-6"></div>
+        <div class="line line-7"></div>
+    </div>
     @php
         // Ensure variables exist with fallbacks
         $voters = $voters ?? collect([]);
@@ -403,7 +484,7 @@
         <div class="header">
             <h1>{{ $settings->post_countdown_title ?? 'ভোটার তথ্য খুঁজুন' }}</h1>
             @if(isset($settings->post_countdown_subtitle) && $settings->post_countdown_subtitle)
-            <p style="margin-top: 10px; opacity: 0.9;">{{ $settings->post_countdown_subtitle }}</p>
+            <p style="margin-top: 10px; color: #0369a1;">{{ $settings->post_countdown_subtitle }}</p>
             @endif
         </div>
         
@@ -550,12 +631,12 @@
                 // Show full details
                 fullDetails.style.display = 'block';
                 btn.innerHTML = '<i class="fas fa-eye-slash"></i> কম দেখান';
-                btn.style.background = 'linear-gradient(135deg, #006A4E 0%, #F42A41 100%)';
+                btn.style.background = 'linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%)';
             } else {
                 // Hide full details
                 fullDetails.style.display = 'none';
                 btn.innerHTML = '<i class="fas fa-eye"></i> সম্পূর্ণ তথ্য দেখুন';
-                btn.style.background = 'linear-gradient(135deg, #F42A41 0%, #006A4E 100%)';
+                btn.style.background = 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)';
             }
         }
         

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#006A4E">
+    <meta name="theme-color" content="#87CEEB">
     <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য">
     <title>ঢাকা–১৩ আসনের ভোটারদের তথ্য</title>
     <link rel="manifest" href="/manifest.json">
@@ -19,41 +19,148 @@
         
         body {
             font-family: 'Noto Sans Bengali', sans-serif;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: linear-gradient(135deg, #E0F7FA 0%, #B3E5FC 35%, #81D4FA 70%, #4FC3F7 100%);
             min-height: 100vh;
-            color: #fff;
+            color: #0c4a6e;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        
+        /* Line-wise abstract: diagonal stripes */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                105deg,
+                transparent 0px,
+                transparent 60px,
+                rgba(255,255,255,0.25) 60px,
+                rgba(255,255,255,0.25) 62px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                -75deg,
+                transparent 0px,
+                transparent 80px,
+                rgba(14,165,233,0.08) 80px,
+                rgba(14,165,233,0.08) 83px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        .abstract-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .abstract-bg .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.2), transparent);
+        }
+        .abstract-bg .line-1 {
+            width: 120%;
+            height: 2px;
+            top: 18%;
+            left: -10%;
+            transform: rotate(-25deg);
+        }
+        .abstract-bg .line-2 {
+            width: 100%;
+            height: 2px;
+            top: 35%;
+            left: 0;
+            transform: rotate(15deg);
+            background: linear-gradient(90deg, transparent, rgba(56,189,248,0.18), transparent);
+        }
+        .abstract-bg .line-3 {
+            width: 110%;
+            height: 2px;
+            bottom: 30%;
+            right: -5%;
+            transform: rotate(-12deg);
+            background: linear-gradient(90deg, transparent, rgba(129,212,250,0.2), transparent);
+        }
+        .abstract-bg .line-4 {
+            width: 90%;
+            height: 2px;
+            bottom: 15%;
+            left: 5%;
+            transform: rotate(8deg);
+        }
+        .abstract-bg .line-5 {
+            width: 130%;
+            height: 2px;
+            top: 55%;
+            left: -15%;
+            transform: rotate(5deg);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+        }
+        .abstract-bg .line-6 {
+            width: 100%;
+            height: 1px;
+            top: 75%;
+            left: 0;
+            transform: rotate(-18deg);
+            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.12), transparent);
+        }
+        .abstract-bg .line-7 {
+            width: 80%;
+            height: 2px;
+            top: 25%;
+            right: 0;
+            transform: rotate(22deg);
+        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         .header {
             text-align: center;
             padding: 30px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         
         .header h1 {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #0c4a6e;
         }
         
         .election-info {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
         }
         
         .election-info h2 {
@@ -61,6 +168,7 @@
             font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
+            color: #0c4a6e;
         }
         
         .info-grid {
@@ -78,31 +186,32 @@
         }
         
         .info-item {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.6);
             padding: 20px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(14, 165, 233, 0.2);
         }
         
         .info-item label {
             display: block;
             font-size: 1rem;
-            opacity: 0.8;
+            color: #0369a1;
             margin-bottom: 8px;
         }
         
         .info-item .value {
             font-size: 1.3rem;
             font-weight: 600;
+            color: #0c4a6e;
         }
         
         .voters-section {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
         }
         
         .voters-section h2 {
@@ -110,11 +219,12 @@
             font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
+            color: #0c4a6e;
         }
         
         .voters-table {
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 10px;
             overflow: hidden;
         }
@@ -125,7 +235,7 @@
         }
         
         .voters-table thead {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(14, 165, 233, 0.2);
         }
         
         .voters-table th {
@@ -133,16 +243,18 @@
             text-align: left;
             font-weight: 600;
             font-size: 1.1rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 2px solid rgba(14, 165, 233, 0.3);
+            color: #0c4a6e;
         }
         
         .voters-table td {
             padding: 12px 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+            color: #0c4a6e;
         }
         
         .voters-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.6);
         }
         
         .voters-table tbody tr:last-child td {
@@ -153,20 +265,21 @@
             text-align: center;
             margin-top: 20px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 10px;
             font-size: 1.2rem;
             font-weight: 600;
+            color: #0c4a6e;
         }
         
         .countdown-section {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             text-align: center;
         }
         
@@ -174,6 +287,7 @@
             font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 20px;
+            color: #0c4a6e;
         }
         
         .countdown-timer {
@@ -185,11 +299,12 @@
         }
         
         .countdown-item {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.8);
             padding: 20px 30px;
             border-radius: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(14, 165, 233, 0.3);
             min-width: 120px;
+            color: #0c4a6e;
         }
         
         .countdown-number {
@@ -197,43 +312,46 @@
             font-weight: 700;
             display: block;
             margin-bottom: 10px;
+            color: #0369a1;
         }
         
         .countdown-label {
             font-size: 1.1rem;
-            opacity: 0.9;
+            color: #0369a1;
         }
         
         .countdown-message {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.7);
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
             font-size: 1.3rem;
             font-weight: 600;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(14, 165, 233, 0.3);
+            color: #0c4a6e;
         }
         
         .waiting-message {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 40px;
             margin: 30px 0;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
         }
         
         .waiting-message h2 {
             font-size: 2rem;
             font-weight: 600;
             margin-bottom: 15px;
+            color: #0c4a6e;
         }
         
         .waiting-message p {
             font-size: 1.3rem;
-            opacity: 0.9;
+            color: #0369a1;
         }
         
         .hidden {
@@ -242,13 +360,13 @@
         
         /* Search Section Styles */
         .search-section {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
             border-radius: 15px;
             padding: 40px 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.85);
         }
         
         .search-header {
@@ -260,11 +378,12 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #0c4a6e;
         }
         
         .search-subtitle {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: #0369a1;
             margin-top: 10px;
         }
         
@@ -274,9 +393,10 @@
         }
         
         .search-form {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.5);
             padding: 30px;
             border-radius: 15px;
+            border: 1px solid rgba(14, 165, 233, 0.2);
         }
         
         .form-row {
@@ -295,32 +415,32 @@
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 8px;
-            opacity: 0.9;
+            color: #0c4a6e;
         }
         
         .form-control {
             padding: 12px 15px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(14, 165, 233, 0.3);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.8);
+            color: #0c4a6e;
             font-size: 1rem;
             font-family: 'Noto Sans Bengali', sans-serif;
         }
         
         .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(12, 74, 110, 0.5);
         }
         
         .form-control:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.15);
+            border-color: #0ea5e9;
+            background: #fff;
         }
         
         .btn-search {
             padding: 12px 30px;
-            background: linear-gradient(135deg, #F42A41 0%, #006A4E 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
             border: none;
             border-radius: 8px;
             color: #fff;
@@ -330,11 +450,12 @@
             transition: all 0.3s ease;
             white-space: nowrap;
             font-family: 'Noto Sans Bengali', sans-serif;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
         }
         
         .btn-search:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
         }
         
         .btn-search:active {
@@ -363,7 +484,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #006A4E 0%, #F42A41 100%);
+            background: linear-gradient(135deg, #E0F7FA 0%, #81D4FA 50%, #4FC3F7 100%);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -410,19 +531,19 @@
             bottom: -5px;
             background: linear-gradient(
                 90deg,
-                #F42A41 0%,
-                #F42A41 10%,
+                #0ea5e9 0%,
+                #0ea5e9 10%,
                 transparent 15%,
                 transparent 85%,
-                #F42A41 90%,
-                #F42A41 100%
+                #0ea5e9 90%,
+                #0ea5e9 100%
             );
             background-size: 200% 100%;
             border-radius: 23px;
             z-index: 0;
             animation: borderRun 2s linear infinite;
-            box-shadow: 0 0 20px rgba(244, 42, 65, 0.8),
-                        0 0 40px rgba(244, 42, 65, 0.6);
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.5),
+                        0 0 40px rgba(14, 165, 233, 0.3);
         }
         
         @keyframes borderRun {
@@ -540,8 +661,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid #006A4E;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 3px solid #0ea5e9;
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.25);
             margin-bottom: 20px;
         }
         
@@ -564,7 +685,7 @@
         .format-2-title h3 {
             font-size: 1.3rem;
             font-weight: 600;
-            color: #006A4E;
+            color: #0c4a6e;
             margin: 0;
             line-height: 1.3;
         }
@@ -586,7 +707,7 @@
         }
         
         .carousel-btn {
-            background: rgba(0, 106, 78, 0.5);
+            background: rgba(14, 165, 233, 0.6);
             border: none;
             color: white;
             width: 40px;
@@ -598,15 +719,15 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 10px rgba(14, 165, 233, 0.3);
             margin-bottom: 15px;
-            opacity: 0.6;
+            opacity: 0.8;
         }
         
         .carousel-btn:hover {
-            background: rgba(0, 106, 78, 0.7);
+            background: rgba(14, 165, 233, 0.9);
             transform: scale(1.1);
-            opacity: 0.9;
+            opacity: 1;
         }
         
         .carousel-indicators {
@@ -619,19 +740,19 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(14, 165, 233, 0.4);
             cursor: pointer;
             transition: all 0.3s ease;
         }
         
         .indicator.active {
-            background: #006A4E;
+            background: #0ea5e9;
             width: 30px;
             border-radius: 6px;
         }
         
         .indicator:hover {
-            background: rgba(0, 106, 78, 0.8);
+            background: rgba(14, 165, 233, 0.8);
         }
         
         .campaign-popup {
@@ -652,8 +773,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid #006A4E;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 3px solid #0ea5e9;
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.25);
         }
         
         .campaign-image img {
@@ -686,12 +807,12 @@
             font-weight: 700;
             margin-bottom: 20px;
             line-height: 1.5;
-            color: #006A4E;
+            color: #0c4a6e;
         }
         
         .campaign-message p {
             font-size: 2rem;
-            color: #F42A41;
+            color: #0369a1;
             font-weight: 600;
         }
         
@@ -703,8 +824,8 @@
             justify-content: center;
             background: #ffffff;
             border-radius: 15px;
-            border: 3px solid #F42A41;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 3px solid #0ea5e9;
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.25);
             overflow: hidden;
             position: relative;
         }
@@ -1129,6 +1250,15 @@
     </style>
 </head>
 <body>
+    <div class="abstract-bg" aria-hidden="true">
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+        <div class="line line-3"></div>
+        <div class="line line-4"></div>
+        <div class="line line-5"></div>
+        <div class="line line-6"></div>
+        <div class="line line-7"></div>
+    </div>
     <div class="container">
         <!-- Campaign Popup Modal with Carousel -->
         @if($popups && $popups->count() > 0)
@@ -1209,9 +1339,9 @@
                                                         <rect x="75" y="95" width="95" height="40" rx="3" fill="#fff" stroke="#2c2c2c" stroke-width="2.5"/>
                                                         
                                                         <!-- High Arched Roof/Canopy -->
-                                                        <path d="M 75 95 Q 122.5 45, 170 95" stroke="#F42A41" stroke-width="4" fill="none" stroke-linecap="round"/>
-                                                        <path d="M 78 95 Q 122.5 50, 167 95" stroke="#F42A41" stroke-width="3" fill="none"/>
-                                                        <path d="M 80 95 Q 122.5 55, 165 95 L 165 100 L 80 100 Z" fill="#F42A41" opacity="0.35"/>
+                                                        <path d="M 75 95 Q 122.5 45, 170 95" stroke="#0ea5e9" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                                        <path d="M 78 95 Q 122.5 50, 167 95" stroke="#0ea5e9" stroke-width="3" fill="none"/>
+                                                        <path d="M 80 95 Q 122.5 55, 165 95 L 165 100 L 80 100 Z" fill="#0ea5e9" opacity="0.35"/>
                                                         
                                                         <!-- Carriage Sides -->
                                                         <line x1="75" y1="95" x2="75" y2="135" stroke="#2c2c2c" stroke-width="2.5"/>
@@ -1263,7 +1393,7 @@
         @endif
         
         @if(session('error'))
-            <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.2); backdrop-filter: blur(10px); border: 2px solid rgba(255, 193, 7, 0.5); color: #fff; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+            <div class="alert alert-warning" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 2px solid rgba(14, 165, 233, 0.4); color: #0c4a6e; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);">
                 <i class="fas fa-exclamation-triangle"></i> <strong>{{ session('error') }}</strong>
             </div>
         @endif
