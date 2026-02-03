@@ -21,12 +21,27 @@ class VoterImportService
     public static function runImport(string $filePath, array $commonFields): array
     {
         $results = ['success' => 0, 'errors' => [], 'duplicates' => 0];
+        
+        // Open file and detect/remove UTF-8 BOM if present
         $handle = fopen($filePath, 'r');
         if ($handle === false) {
             throw new \RuntimeException('Failed to open CSV file.');
         }
+        
+        // Read first 3 bytes to check for UTF-8 BOM (EF BB BF)
+        $bom = fread($handle, 3);
+        if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
+            // No BOM, rewind to start
+            rewind($handle);
+        }
+        // If BOM was found, file pointer is already after BOM, so continue reading
 
         $header = fgetcsv($handle);
+        // Remove BOM from first header cell if still present (extra safety)
+        if (!empty($header[0])) {
+            $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', $header[0]);
+        }
+        
         $columnIndices = self::mapCsvHeaderToColumns($header ?? [], self::EXPECTED_COLUMNS);
         if ($columnIndices === null) {
             fclose($handle);

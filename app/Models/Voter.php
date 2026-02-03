@@ -3,63 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Voter extends Model
 {
-    public $incrementing = false;
-    protected $keyType = 'integer';
-
-    protected $fillable = [
-        'name',
-        'voter_number',
-        'father_name',
-        'mother_name',
-        'occupation',
-        'address',
-        'polling_center_name',
-        'ward_number',
-        'voter_area_number',
-        'voter_serial_number',
-        'date_of_birth',
-    ];
-
-    protected $casts = [
-        'date_of_birth' => 'date',
-    ];
-
     /**
-     * Get the next available sequential ID starting from 1
+     * Get the next sequential ID for bulk insert operations.
+     * This ensures IDs are sequential when inserting multiple records.
      */
-    public static function getNextSequentialId()
+    public static function getNextSequentialId(): int
     {
-        // Get all existing IDs
-        $existingIds = static::pluck('id')->sort()->values()->toArray();
-        
-        // Find the first gap starting from 1
-        $expectedId = 1;
-        foreach ($existingIds as $existingId) {
-            if ($existingId == $expectedId) {
-                $expectedId++;
-            } else {
-                break;
-            }
-        }
-        
-        return $expectedId;
-    }
-
-    /**
-     * Boot the model
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($voter) {
-            if (!$voter->id) {
-                $voter->id = static::getNextSequentialId();
-            }
-        });
+        $maxId = static::max('id') ?? 0;
+        return $maxId + 1;
     }
 }

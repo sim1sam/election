@@ -189,7 +189,19 @@ class VoterController extends Controller
     public function importCsv(Request $request)
     {
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:51200', // 50MB max
+            'csv_file' => [
+                'required',
+                'file',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $extension = strtolower($value->getClientOriginalExtension());
+                        if ($extension !== 'csv') {
+                            $fail('The file must be a CSV file (.csv extension).');
+                        }
+                    }
+                },
+                'max:51200', // 50MB max
+            ],
             'polling_center_name' => 'required|string|max:255',
             'ward_number' => 'required|string|max:255',
             'voter_area_number' => 'required|string|max:255',
