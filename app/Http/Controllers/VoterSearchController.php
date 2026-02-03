@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Voter;
 use App\Models\HomePageSetting;
+use App\Models\Popup;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -269,13 +270,16 @@ class VoterSearchController extends Controller
     {
         $voter = Voter::findOrFail($id);
         
+        // Get active popup data (for candidate image, title, subtitle, icon)
+        $popup = Popup::getFirstActive();
+        
         // Generate PDF filename using person's name
         $filename = str_replace([' ', '/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $voter->name) . '.pdf';
         
         // Render the view to HTML
-        $html = view('voter-pdf', compact('voter'))->render();
+        $html = view('voter-pdf', compact('voter', 'popup'))->render();
         
-        // Configure mPDF with Bengali font support
+        // Configure mPDF with SolaimanLipi font support and sky blue theme
         $fontConfig = [
             'mode' => 'utf-8',
             'format' => 'A4',
@@ -289,43 +293,113 @@ class VoterSearchController extends Controller
             'autoLangToFont' => true,
             'useSubstitutions' => true,
             'default_font' => 'freeserif',
+            'default_font_size' => 14,
         ];
         
-        // Add Bengali font if available
-        $bengaliFontPath = base_path('vendor/mpdf/mpdf/ttfonts/NotoSansBengali-Regular.ttf');
-        $storageFontPath = storage_path('fonts/NotoSansBengali-Regular.ttf');
+        // Check for SolaimanLipi font in multiple locations
+        $solaimanLipiPaths = [
+            base_path('vendor/mpdf/mpdf/ttfonts/SolaimanLipi.ttf'),
+            base_path('vendor/mpdf/mpdf/ttfonts/solaimanlipi.ttf'),
+            storage_path('fonts/SolaimanLipi.ttf'),
+            storage_path('fonts/solaimanlipi.ttf'),
+            public_path('fonts/SolaimanLipi.ttf'),
+            public_path('fonts/solaimanlipi.ttf'),
+        ];
         
-        // Check both locations for the font file
         $fontFile = null;
         $fontDir = null;
         
-        if (file_exists($bengaliFontPath) && filesize($bengaliFontPath) > 1000) {
-            $fontFile = 'NotoSansBengali-Regular.ttf';
-            $fontDir = base_path('vendor/mpdf/mpdf/ttfonts');
-        } elseif (file_exists($storageFontPath) && filesize($storageFontPath) > 1000) {
-            // Copy from storage to vendor if needed
-            if (!file_exists($bengaliFontPath)) {
-                @copy($storageFontPath, $bengaliFontPath);
+        foreach ($solaimanLipiPaths as $fontPath) {
+            if (file_exists($fontPath) && filesize($fontPath) > 1000) {
+                $fontFile = basename($fontPath);
+                $fontDir = dirname($fontPath);
+                
+                // If font is in storage or public, copy to vendor/mpdf/ttfonts for mPDF to use
+                if (strpos($fontDir, 'vendor/mpdf/mpdf/ttfonts') === false) {
+                    $targetPath = base_path('vendor/mpdf/mpdf/ttfonts/' . $fontFile);
+                    if (!file_exists($targetPath)) {
+                        @copy($fontPath, $targetPath);
+                    }
+                    if (file_exists($targetPath) && filesize($targetPath) > 1000) {
+                        $fontFile = basename($targetPath);
+                        $fontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+                    }
+                }
+                break;
             }
+        }
+        
+        // If SolaimanLipi not found, fallback to NotoSansBengali
+        if (!$fontFile) {
+            $bengaliFontPath = base_path('vendor/mpdf/mpdf/ttfonts/NotoSansBengali-Regular.ttf');
+            $storageFontPath = storage_path('fonts/NotoSansBengali-Regular.ttf');
+            
             if (file_exists($bengaliFontPath) && filesize($bengaliFontPath) > 1000) {
                 $fontFile = 'NotoSansBengali-Regular.ttf';
                 $fontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+            } elseif (file_exists($storageFontPath) && filesize($storageFontPath) > 1000) {
+                if (!file_exists($bengaliFontPath)) {
+                    @copy($storageFontPath, $bengaliFontPath);
+                }
+                if (file_exists($bengaliFontPath) && filesize($bengaliFontPath) > 1000) {
+                    $fontFile = 'NotoSansBengali-Regular.ttf';
+                    $fontDir = base_path('vendor/mpdf/mpdf/ttfonts');
+                }
             }
         }
         
         if ($fontFile && $fontDir) {
             $fontConfig['fontDir'] = [$fontDir];
-            $fontConfig['fontdata'] = [
-                'notosansbengali' => [
-                    'R' => $fontFile,
-                ],
+            $fontName = strtolower(str_replace(['.ttf', '.TTF'], '', $fontFile));
+            $fontName = str_replace(' ', '', $fontName);
+            
+            // Normalize font name for SolaimanLipi - ensure lowercase
+            if (stripos($fontFile, 'solaiman') !== false) {
+                $fontName = 'solaimanlipi';
+            } elseif (stripos($fontFile, 'noto') !== false) {
+                $fontName = 'notosansbengali';
+            } else {
+                $fontName = strtolower(str_replace(['.ttf', '.TTF', ' ', '-'], '', $fontFile));
+            }
+            
+            // Register font with all variants (R=Regular, B=Bold, I=Italic, BI=BoldItalic)
+            // Use same file for all variants if only one file available
+            $fontData = [
+                'R' => $fontFile,
+                'B' => $fontFile,  // Use same file for bold
+                'I' => $fontFile,  // Use same file for italic
+                'BI' => $fontFile, // Use same file for bold italic
             ];
-            $fontConfig['default_font'] = 'notosansbengali';
+            
+            $fontConfig['fontdata'] = [
+                $fontName => $fontData,
+            ];
+            
+            // Also register with different name variations for compatibility
+            $fontConfig['fontdata'][strtolower($fontName)] = $fontData;
+            if ($fontName !== str_replace(' ', '', $fontName)) {
+                $fontConfig['fontdata'][str_replace(' ', '', $fontName)] = $fontData;
+            }
+            
+            $fontConfig['default_font'] = $fontName;
         }
         
         $mpdf = new Mpdf($fontConfig);
         
-        // Write HTML content
+        // Set default font for all text elements
+        $defaultFont = $fontConfig['default_font'] ?? 'freeserif';
+        $mpdf->SetDefaultFont($defaultFont);
+        
+        // Write HTML content with explicit font settings
+        // Use SetFont before writing to ensure font is active
+        if (isset($fontConfig['fontdata']) && $defaultFont !== 'freeserif') {
+            try {
+                $mpdf->SetFont($defaultFont, '', 14);
+            } catch (\Exception $e) {
+                // If font setting fails, continue with default
+            }
+        }
+        
         $mpdf->WriteHTML($html);
         
         // Output PDF as download

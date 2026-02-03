@@ -14,212 +14,247 @@
         @charset "UTF-8";
         
         body {
-            font-family: notosansbengali, freeserif, sans-serif;
-            padding: 20px;
-            color: #000;
-            background: #fff;
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
+            padding: 0;
+            color: #0c4a6e;
+            background: #ffffff;
             font-size: 14px;
         }
         
-        table, td, tr {
-            font-family: notosansbengali, freeserif, sans-serif;
-            color: #000;
+        /* Explicit font declarations for all elements */
+        * {
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
         }
         
-        td {
-            overflow: visible;
-            text-overflow: clip;
-            display: table-cell;
-        }
         
         .info-label {
-            font-family: notosansbengali, freeserif, sans-serif;
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
             overflow: visible;
             visibility: visible;
             opacity: 1;
         }
         
         .info-value {
-            font-family: notosansbengali, freeserif, sans-serif;
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
             overflow: visible;
             visibility: visible;
             opacity: 1;
         }
         
-        h1, p {
-            font-family: notosansbengali, freeserif, sans-serif;
+        p {
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
+            margin: 0;
+            padding: 0;
         }
         
-        .header {
-            text-align: center;
+        div, span {
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
+        }
+        
+        
+        /* Top Section - Candidate/Popup Information */
+        .top-section {
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #333;
+            padding: 20px 15px;
+            border-bottom: 3px solid #0ea5e9;
+            background: #ffffff;
+            border-radius: 8px;
         }
         
-        .header h1 {
-            color: #000;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .voter-info {
-            background: #f9f9f9;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 2px solid #333;
-            overflow: visible;
-            width: 100%;
-        }
-        
-        .info-table {
+        .top-section-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
         
-        .info-row {
-            border-bottom: 1px solid #ddd;
+        .top-section-table td {
+            vertical-align: middle;
+            padding: 10px;
         }
         
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            color: #000;
-            width: 35%;
-            font-size: 16px;
-            padding: 12px 10px 12px 5px;
-            vertical-align: top;
+        .left-column {
+            width: 25%;
             text-align: left;
-            display: table-cell;
-            font-family: notosansbengali, freeserif, sans-serif !important;
         }
         
-        .info-value {
-            color: #000;
-            font-size: 16px;
-            font-weight: normal;
-            width: 65%;
-            padding: 12px 5px 12px 10px;
-            word-wrap: break-word;
-            vertical-align: top;
-            display: table-cell;
+        .middle-column {
+            width: 50%;
+            text-align: center;
+        }
+        
+        .right-column {
+            width: 25%;
+            text-align: right;
+        }
+        
+        .candidate-image-container {
+            display: inline-block;
+        }
+        
+        .candidate-image {
+            max-width: 120px;
+            max-height: 120px;
+            width: 120px;
+            height: 120px;
+            border: 3px solid #0ea5e9;
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+            background: #ffffff;
+        }
+        
+        
+        .icon-image-container {
+            display: inline-block;
+            background: #ffffff;
+            padding: 5px;
+            border-radius: 8px;
+        }
+        
+        .icon-image {
+            max-width: 120px;
+            max-height: 120px;
+            width: 120px;
+            height: 120px;
+            border: 3px solid #0ea5e9;
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+            background: #ffffff;
+        }
+        
+        /* Voter Information Section */
+        .voter-info {
+            background: #ffffff;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #0ea5e9;
+            overflow: visible;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+        
+        
+        .top-section-table {
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
+        }
+        
+        .voter-info p {
+            font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;
         }
         
         .footer {
             margin-top: 30px;
             text-align: center;
             padding-top: 20px;
-            border-top: 2px solid #ddd;
-            color: #666;
+            border-top: 2px solid rgba(14, 165, 233, 0.3);
+            color: #0369a1;
             font-size: 12px;
         }
         
         @page {
             margin: 20mm;
+            background: #ffffff;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>ভোটার তথ্য</h1>
-        <p>ঢাকা-১৩ আসনের ভোটারদের তথ্য</p>
+    <!-- Top Section: Candidate/Popup Information -->
+    @if($popup)
+    <div class="top-section">
+        <table class="top-section-table">
+            <tr>
+                <!-- Left Column: Candidate Image -->
+                <td class="left-column">
+                    @if($popup->image && file_exists(public_path($popup->image)))
+                    <div class="candidate-image-container">
+                        <img src="{{ public_path($popup->image) }}" alt="Candidate" class="candidate-image" />
+                    </div>
+                    @endif
+                </td>
+                
+                <!-- Middle Column: Title and Subtitle -->
+                <td class="middle-column">
+                    @if($popup->title)
+                    <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; font-size:26px;">{!! htmlspecialchars($popup->title, ENT_QUOTES, 'UTF-8') !!}</p>
+                    @endif
+                    
+                    @if($popup->subtitle)
+                    <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; font-size: 20px;">{!! htmlspecialchars($popup->subtitle, ENT_QUOTES, 'UTF-8') !!}</p>
+                    @endif
+                </td>
+                
+                <!-- Right Column: Icon Image -->
+                <td class="right-column">
+                    @if($popup->icon_image && file_exists(public_path($popup->icon_image)))
+                    <div class="icon-image-container">
+                        <img src="{{ public_path($popup->icon_image) }}" alt="Icon" class="icon-image" />
+                    </div>
+                    @endif
+                </td>
+            </tr>
+        </table>
     </div>
+    @endif
     
+    <!-- Voter Information Section -->
     <div class="voter-info">
-        <table class="info-table">
-            <tr class="info-row">
-                <td class="info-label">Name:</td>
-                <td class="info-value">{!! htmlspecialchars($voter->name, ENT_QUOTES, 'UTF-8') !!}</td>
-            </tr>
+        <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; font-size: 26px; ">ভোটার তথ্য</p>
+        
+        <div style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;">
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">নাম: {!! htmlspecialchars($voter->name, ENT_QUOTES, 'UTF-8') !!}</p>
             
-            <tr class="info-row">
-                <td class="info-label">Voter Number:</td>
-                <td class="info-value">{!! \App\Helpers\NumberConverter::englishToBangla($voter->voter_number) !!}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">ভোটার নম্বর: {!! \App\Helpers\NumberConverter::englishToBangla($voter->voter_number) !!}</p>
             
             @if($voter->father_name)
-            <tr class="info-row">
-                <td class="info-label">Father's Name:</td>
-                <td class="info-value">{!! htmlspecialchars($voter->father_name, ENT_QUOTES, 'UTF-8') !!}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">পিতার নাম: {!! htmlspecialchars($voter->father_name, ENT_QUOTES, 'UTF-8') !!}</p>
             @endif
             
             @if($voter->mother_name)
-            <tr class="info-row">
-                <td class="info-label">Mother's Name:</td>
-                <td class="info-value">{!! htmlspecialchars($voter->mother_name, ENT_QUOTES, 'UTF-8') !!}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">মাতার নাম: {!! htmlspecialchars($voter->mother_name, ENT_QUOTES, 'UTF-8') !!}</p>
             @endif
             
             @if($voter->ward_number)
-            <tr class="info-row">
-                <td class="info-label">Ward Number:</td>
-                <td class="info-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->ward_number) }}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">ওয়ার্ড নম্বর: {{ \App\Helpers\NumberConverter::englishToBangla($voter->ward_number) }}</p>
             @endif
             
             @if($voter->voter_area_number)
-            <tr class="info-row">
-                <td class="info-label">Voter Area Number:</td>
-                <td class="info-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_area_number) }}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">ভোটার এলাকার নম্বর: {{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_area_number) }}</p>
             @endif
             
             @if($voter->voter_serial_number)
-            <tr class="info-row">
-                <td class="info-label">Voter Serial Number:</td>
-                <td class="info-value">{{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_serial_number) }}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">ভোটার সিরিয়াল নম্বর: {{ \App\Helpers\NumberConverter::englishToBangla($voter->voter_serial_number) }}</p>
             @endif
             
             @if($voter->date_of_birth)
-            <tr class="info-row">
-                <td class="info-label">Date of Birth:</td>
-                <td class="info-value">
-                    @php
-                        $dateStr = $voter->date_of_birth instanceof \Carbon\Carbon 
-                            ? $voter->date_of_birth->format('d/m/Y') 
-                            : \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y');
-                    @endphp
-                    {{ \App\Helpers\NumberConverter::englishToBangla($dateStr) }}
-                </td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">
+                জন্ম তারিখ: 
+                @php
+                    $dateStr = $voter->date_of_birth instanceof \Carbon\Carbon 
+                        ? $voter->date_of_birth->format('d/m/Y') 
+                        : \Carbon\Carbon::parse($voter->date_of_birth)->format('d/m/Y');
+                @endphp
+                {{ \App\Helpers\NumberConverter::englishToBangla($dateStr) }}
+            </p>
             @endif
             
             @if($voter->occupation)
-            <tr class="info-row">
-                <td class="info-label">Occupation:</td>
-                <td class="info-value">{!! htmlspecialchars($voter->occupation, ENT_QUOTES, 'UTF-8') !!}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">পেশা: {!! htmlspecialchars($voter->occupation, ENT_QUOTES, 'UTF-8') !!}</p>
             @endif
             
             @if($voter->address)
-            <tr class="info-row">
-                <td class="info-label">Address:</td>
-                <td class="info-value">{!! htmlspecialchars($voter->address, ENT_QUOTES, 'UTF-8') !!}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">ঠিকানা: {!! htmlspecialchars($voter->address, ENT_QUOTES, 'UTF-8') !!}</p>
             @endif
             
             @if($voter->polling_center_name)
-            <tr class="info-row">
-                <td class="info-label">Polling Center:</td>
-                <td class="info-value">{!! htmlspecialchars($voter->polling_center_name, ENT_QUOTES, 'UTF-8') !!}</td>
-            </tr>
+            <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; margin: 0 0 8px 0; padding: 0; font-size: 18px;">ভোট কেন্দ্রের নাম: {!! htmlspecialchars($voter->polling_center_name, ENT_QUOTES, 'UTF-8') !!}</p>
             @endif
-        </table>
+        </div>
     </div>
     
     <div class="footer">
-        <p>এই তথ্যটি {{ now()->format('d/m/Y') }} তারিখে ডাউনলোড করা হয়েছে</p>
+        <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important;">এই তথ্যটি {{ \App\Helpers\NumberConverter::englishToBangla(now()->format('d/m/Y')) }} তারিখে ডাউনলোড করা হয়েছে</p>
     </div>
 </body>
 </html>
