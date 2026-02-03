@@ -154,12 +154,23 @@
                                 <td>{{ $voter->father_name ?? '-' }}</td>
                                 <td>{{ $voter->mother_name ?? '-' }}</td>
                                 <td>{{ $voter->occupation ?? '-' }}</td>
-                                <td>{{ Str::limit($voter->address, 30) ?? '-' }}</td>
+                                <td>{{ $voter->address ? \Illuminate\Support\Str::limit($voter->address, 30) : '-' }}</td>
                                 <td>{{ $voter->polling_center_name ?? '-' }}</td>
                                 <td>{{ $voter->ward_number ?? '-' }}</td>
                                 <td>{{ $voter->voter_area_number ?? '-' }}</td>
                                 <td>{{ $voter->voter_serial_number ?? '-' }}</td>
-                                <td>{{ $voter->date_of_birth ? $voter->date_of_birth->format('d/m/Y') : '-' }}</td>
+                                <td>
+                                    @if($voter->date_of_birth)
+                                        @php
+                                            $date = $voter->date_of_birth instanceof \Carbon\Carbon 
+                                                ? $voter->date_of_birth 
+                                                : \Carbon\Carbon::parse($voter->date_of_birth);
+                                        @endphp
+                                        {{ $date->format('d/m/Y') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>
                                     <a href="{{ route('admin.voters.edit', $voter) }}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-edit"></i> Edit
