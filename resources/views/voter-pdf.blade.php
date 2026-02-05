@@ -160,44 +160,6 @@
     </style>
 </head>
 <body>
-    <!-- Top Section: Candidate/Popup Information -->
-    @if($popup)
-    <div class="top-section">
-        <table class="top-section-table">
-            <tr>
-                <!-- Left Column: Candidate Image -->
-                <td class="left-column">
-                    @if($popup->image && file_exists(public_path($popup->image)))
-                    <div class="candidate-image-container">
-                        <img src="{{ public_path($popup->image) }}" alt="Candidate" class="candidate-image" />
-                    </div>
-                    @endif
-                </td>
-                
-                <!-- Middle Column: Title and Subtitle -->
-                <td class="middle-column">
-                    @if($popup->title)
-                    <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; font-size:26px;">{!! htmlspecialchars($popup->title, ENT_QUOTES, 'UTF-8') !!}</p>
-                    @endif
-                    
-                    @if($popup->subtitle)
-                    <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; font-size: 20px;">{!! htmlspecialchars($popup->subtitle, ENT_QUOTES, 'UTF-8') !!}</p>
-                    @endif
-                </td>
-                
-                <!-- Right Column: Icon Image -->
-                <td class="right-column">
-                    @if($popup->icon_image && file_exists(public_path($popup->icon_image)))
-                    <div class="icon-image-container">
-                        <img src="{{ public_path($popup->icon_image) }}" alt="Icon" class="icon-image" />
-                    </div>
-                    @endif
-                </td>
-            </tr>
-        </table>
-    </div>
-    @endif
-    
     <!-- Voter Information Section -->
     <div class="voter-info">
         <p style="font-family: solaimanlipi, notosansbengali, freeserif, sans-serif !important; font-size: 26px; ">ভোটার তথ্য</p>
