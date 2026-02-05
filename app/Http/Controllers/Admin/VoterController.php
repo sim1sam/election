@@ -18,6 +18,12 @@ class VoterController extends Controller
     {
         $query = Voter::query();
 
+        // Search by name (similar name search)
+        if ($request->filled('name')) {
+            $name = $request->name;
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
         // Search by voter number (convert Bangla to English)
         if ($request->filled('voter_number')) {
             $voterNumber = NumberConverter::banglaToEnglish($request->voter_number);
@@ -28,6 +34,12 @@ class VoterController extends Controller
         if ($request->filled('ward_number')) {
             $wardNumber = NumberConverter::banglaToEnglish($request->ward_number);
             $query->where('ward_number', 'like', '%' . $wardNumber . '%');
+        }
+
+        // Search by voter area number (convert Bangla to English)
+        if ($request->filled('voter_area_number')) {
+            $voterAreaNumber = NumberConverter::banglaToEnglish($request->voter_area_number);
+            $query->where('voter_area_number', 'like', '%' . $voterAreaNumber . '%');
         }
 
         // Search by voter serial number (convert Bangla to English)

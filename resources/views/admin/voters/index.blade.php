@@ -69,6 +69,17 @@
             <form method="GET" action="{{ route('admin.voters.index') }}" class="row">
                 <div class="col-12 col-md-4">
                     <div class="form-group">
+                        <label for="name">নাম (Name)</label>
+                        <input type="text" 
+                               name="name" 
+                               id="name" 
+                               class="form-control" 
+                               value="{{ request('name') }}" 
+                               placeholder="Enter name (similar names will be shown)">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="form-group">
                         <label for="voter_number">ভোটার নম্বর (Voter Number)</label>
                         <input type="text" 
                                name="voter_number" 
@@ -76,6 +87,17 @@
                                class="form-control" 
                                value="{{ request('voter_number') }}" 
                                placeholder="Enter voter number">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="form-group">
+                        <label for="voter_area_number">ভোটার এলাকার নম্বর (Voter Area Number)</label>
+                        <input type="text" 
+                               name="voter_area_number" 
+                               id="voter_area_number" 
+                               class="form-control" 
+                               value="{{ request('voter_area_number') }}" 
+                               placeholder="Enter voter area number">
                     </div>
                 </div>
                 <div class="col-12 col-md-4">
@@ -105,7 +127,7 @@
                         <button type="submit" class="btn btn-primary btn-block btn-sm">
                             <i class="fas fa-search"></i> Search
                         </button>
-                        @if(request()->hasAny(['voter_number', 'ward_number', 'voter_serial_number']))
+                        @if(request()->hasAny(['name', 'voter_number', 'voter_area_number', 'ward_number', 'voter_serial_number']))
                             <a href="{{ route('admin.voters.index') }}" class="btn btn-secondary btn-block btn-sm mt-2">
                                 <i class="fas fa-times"></i> Clear
                             </a>
@@ -118,7 +140,7 @@
 
     <div class="card">
         <div class="card-body">
-            @if(request()->hasAny(['voter_number', 'ward_number', 'voter_serial_number']))
+            @if(request()->hasAny(['name', 'voter_number', 'voter_area_number', 'ward_number', 'voter_serial_number']))
                 <div class="alert alert-info mb-3">
                     <i class="fas fa-info-circle"></i> 
                     Showing search results. 
