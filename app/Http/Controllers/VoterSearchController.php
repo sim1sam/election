@@ -56,11 +56,18 @@ class VoterSearchController extends Controller
         }
         
         $request->validate([
-            'ward_number' => 'nullable|string|max:255',
-            'date_of_birth' => 'nullable|date',
+            'ward_number' => 'required|string|max:255',
+            'date_of_birth' => 'required|string|max:50', // Accept dd/mm/yyyy or Y-m-d; parsing done below
+            'name' => 'nullable|string|max:255',
         ]);
 
         $query = Voter::query();
+
+        // Search by name (optional, similar name match)
+        if ($request->filled('name')) {
+            $name = trim($request->name);
+            $query->where('name', 'like', '%' . $name . '%');
+        }
 
         // Search by ward number (convert Bangla to English, use exact match)
         if ($request->filled('ward_number')) {

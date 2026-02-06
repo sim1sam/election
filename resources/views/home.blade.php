@@ -394,21 +394,34 @@
         
         .search-form {
             background: rgba(255, 255, 255, 0.5);
-            padding: 30px;
+            padding: 49px 8px;
             border-radius: 15px;
             border: 1px solid rgba(14, 165, 233, 0.2);
         }
         
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr auto;
             gap: 20px;
             align-items: end;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
         
         .form-group {
             display: flex;
             flex-direction: column;
+        }
+        .form-group.form-group-btn label.btn-label-spacer {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            visibility: hidden;
+            height: 1.5em;
+            line-height: 1.2;
         }
         
         .form-group label {
@@ -1443,22 +1456,29 @@
             </div>
             
             <div class="search-form-container">
-                <form action="{{ route('voter.search.submit') }}" method="POST" class="search-form">
+                <form action="{{ route('voter.search.submit') }}" method="POST" class="search-form" id="homeSearchForm">
                     @csrf
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="ward_number">ওয়ার্ড নম্বর:</label>
+                            <label for="ward_number">ওয়ার্ড নম্বর: <span class="text-danger">*</span></label>
                             <input type="text" name="ward_number" id="ward_number" 
                                    class="form-control" placeholder="ওয়ার্ড নম্বর লিখুন" 
-                                   value="{{ old('ward_number') }}">
+                                   value="{{ old('ward_number') }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="date_of_birth">জন্ম তারিখ:</label>
+                            <label for="date_of_birth">জন্ম তারিখ: <span class="text-danger">*</span></label>
                             <input type="date" name="date_of_birth" id="date_of_birth" 
-                                   class="form-control" value="{{ old('date_of_birth') }}">
+                                   class="form-control" value="{{ old('date_of_birth') }}" required>
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn-search">
+                            <label for="name">নাম <span class="text-muted">(ঐচ্ছিক)</span></label>
+                            <input type="text" name="name" id="name" 
+                                   class="form-control" placeholder="নাম লিখুন" 
+                                   value="{{ old('name') }}">
+                        </div>
+                        <div class="form-group form-group-btn">
+                            <label class="btn-label-spacer" for="homeSearchBtn">&nbsp;</label>
+                            <button type="submit" class="btn-search" id="homeSearchBtn">
                                 <i class="fas fa-search"></i> খুঁজুন
                             </button>
                         </div>
@@ -1679,7 +1699,7 @@
     </script>
     
     <!-- PWA Scripts -->
-    <script src="/js/indexeddb.js"></script>
-    <script src="/js/pwa.js"></script>
+    <script src="/js/indexeddb.js?v=2"></script>
+    <script src="/js/pwa.js?v=2"></script>
 </body>
 </html>

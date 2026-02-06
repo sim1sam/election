@@ -489,7 +489,7 @@
         </div>
         
         <div class="search-again">
-            <a href="{{ route('voter.search') }}" class="btn-back">
+            <a href="{{ url('/') }}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> নতুন করে খুঁজুন
             </a>
         </div>
@@ -675,8 +675,8 @@
     </script>
     
     <!-- PWA Scripts -->
-    <script src="/js/indexeddb.js"></script>
-    <script src="/js/pwa.js"></script>
+    <script src="/js/indexeddb.js?v=2"></script>
+    <script src="/js/pwa.js?v=2"></script>
 </body>
 </html>
 

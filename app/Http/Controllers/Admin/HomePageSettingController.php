@@ -32,6 +32,7 @@ class HomePageSettingController extends Controller
             'waiting_message_1' => 'required|string',
             'waiting_message_2' => 'required|string',
             'election_info_title' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'area_name' => 'required|string|max:255',
             'election_center' => 'required|string|max:255',
             'total_voters' => 'required|string|max:255',

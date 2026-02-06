@@ -115,10 +115,7 @@ class PWAHelper {
         return;
       }
 
-      // Show loading notification
-      this.showNotification('ডেটা লোড হচ্ছে', 'সমস্ত ভোটার তথ্য ডাউনলোড করা হচ্ছে...', 'info');
-
-      // Fetch all voters from API in chunks (pagination)
+      // Fetch all voters from API in chunks (pagination) - no loading notification
       let page = 1;
       let allVoters = [];
       let totalLoaded = 0;
@@ -151,15 +148,6 @@ class PWAHelper {
           // Add voters to array
           allVoters = allVoters.concat(data.voters);
           totalLoaded += data.voters.length;
-          
-          // Update notification (only every 5 pages to avoid spam)
-          if (page % 5 === 0 || page === 1) {
-            this.showNotification(
-              'ডেটা লোড হচ্ছে', 
-              `${totalLoaded} / ${totalCount} জন ভোটার লোড করা হয়েছে...`, 
-              'info'
-            );
-          }
           
           // Check if there are more pages
           if (!data.has_more || data.voters.length < data.per_page) {
@@ -197,7 +185,6 @@ class PWAHelper {
       }
     } catch (error) {
       console.error('[PWA] Error loading all voter data:', error);
-      this.showNotification('ডেটা লোড ব্যর্থ', 'ভোটার তথ্য লোড করতে সমস্যা হয়েছে', 'warning');
     }
   }
 

@@ -239,7 +239,7 @@
         
         .search-form {
             background: rgba(255, 255, 255, 0.5);
-            padding: 30px;
+            padding: 49px 8px;
             border-radius: 15px;
             border: 1px solid rgba(14, 165, 233, 0.2);
         }
@@ -254,6 +254,14 @@
         .form-group {
             display: flex;
             flex-direction: column;
+        }
+        .form-group.form-group-btn label.btn-label-spacer {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            visibility: hidden;
+            height: 1.5em;
+            line-height: 1.2;
         }
         
         .form-group label {
@@ -810,8 +818,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn-search">
+                        <div class="form-group form-group-btn">
+                            <label class="btn-label-spacer" for="searchFormBtn">&nbsp;</label>
+                            <button type="submit" class="btn-search" id="searchFormBtn">
                                 <i class="fas fa-search"></i> খুঁজুন
                             </button>
                         </div>
@@ -841,8 +850,8 @@
     </div>
     
     <!-- PWA Scripts -->
-    <script src="/js/indexeddb.js"></script>
-    <script src="/js/pwa.js"></script>
+    <script src="/js/indexeddb.js?v=2"></script>
+    <script src="/js/pwa.js?v=2"></script>
     
     <!-- Search form handler - use server when online, cache when offline -->
     <script>
