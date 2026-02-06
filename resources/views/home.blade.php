@@ -420,7 +420,6 @@
         .form-group.form-group-btn {
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
         }
         .form-group.form-group-btn label.btn-label-spacer {
             font-size: 1.1rem;
@@ -432,7 +431,13 @@
         }
         .form-group.form-group-btn .btn-search {
             width: 100%;
-            align-self: flex-end;
+            padding: 12px 15px;
+            height: auto;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
         }
         
         .form-group label {
