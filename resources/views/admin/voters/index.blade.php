@@ -6,6 +6,10 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
         <h1><i class="fas fa-users"></i> Voter Management</h1>
         <div class="mt-2 mt-md-0 d-flex flex-wrap gap-2">
+            <a href="{{ route('admin.voters.export', request()->query()) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-file-csv"></i> <span class="d-none d-md-inline">Export CSV</span>
+                <span class="d-md-none">Export</span>
+            </a>
             <a href="{{ route('admin.voters.download-template') }}" class="btn btn-info btn-sm">
                 <i class="fas fa-download"></i> <span class="d-none d-md-inline">Download CSV Template</span>
                 <span class="d-md-none">Template</span>

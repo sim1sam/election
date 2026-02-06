@@ -257,6 +257,81 @@ class VoterController extends Controller
             ->with('success', $message)
             ->with('import_errors', array_slice($results['errors'], 0, 100));
     }
+
+    /**
+     * Export voters to CSV (respects current filters).
+     */
+    public function exportCsv(Request $request)
+    {
+        $query = Voter::query();
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        if ($request->filled('voter_number')) {
+            $voterNumber = NumberConverter::banglaToEnglish($request->voter_number);
+            $query->where('voter_number', 'like', '%' . $voterNumber . '%');
+        }
+        if ($request->filled('ward_number')) {
+            $wardNumber = NumberConverter::banglaToEnglish($request->ward_number);
+            $query->where('ward_number', 'like', '%' . $wardNumber . '%');
+        }
+        if ($request->filled('voter_area_number')) {
+            $voterAreaNumber = NumberConverter::banglaToEnglish($request->voter_area_number);
+            $query->where('voter_area_number', 'like', '%' . $voterAreaNumber . '%');
+        }
+        if ($request->filled('voter_serial_number')) {
+            $voterSerialNumber = NumberConverter::banglaToEnglish($request->voter_serial_number);
+            $query->where('voter_serial_number', 'like', '%' . $voterSerialNumber . '%');
+        }
+        if ($request->filled('date_of_birth')) {
+            $query->whereDate('date_of_birth', $request->date_of_birth);
+        }
+
+        $voters = $query->orderBy('id', 'asc')->get();
+
+        $filename = 'voters_export_' . date('Y-m-d_His') . '.csv';
+
+        return response()->streamDownload(function () use ($voters) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($file, [
+                'নাম (Name)',
+                'ভোটার নম্বর (Voter Number)',
+                'পিতা (Father Name)',
+                'মাতা (Mother Name)',
+                'পেশা (Occupation)',
+                'ঠিকানা (Address)',
+                'ভোট কেন্দ্র (Polling Center)',
+                'ওয়ার্ড নম্বর (Ward Number)',
+                'ভোটার এলাকার নম্বর (Voter Area Number)',
+                'ভোটার সিরিয়াল নম্বর (Voter Serial Number)',
+                'জন্ম তারিখ (Date of Birth)',
+            ]);
+            foreach ($voters as $voter) {
+                $dob = $voter->date_of_birth
+                    ? (\Carbon\Carbon::parse($voter->date_of_birth)->format('Y-m-d'))
+                    : '';
+                fputcsv($file, [
+                    $voter->name ?? '',
+                    "'" . ($voter->voter_number ?? ''),
+                    $voter->father_name ?? '',
+                    $voter->mother_name ?? '',
+                    $voter->occupation ?? '',
+                    $voter->address ?? '',
+                    $voter->polling_center_name ?? '',
+                    $voter->ward_number ?? '',
+                    $voter->voter_area_number ?? '',
+                    $voter->voter_serial_number ?? '',
+                    $dob,
+                ]);
+            }
+            fclose($file);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     /**
      * Download CSV template
      */

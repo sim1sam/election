@@ -50,6 +50,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/voters/upload', [App\Http\Controllers\Admin\VoterController::class, 'showUploadForm'])->name('voters.upload');
     Route::post('/voters/import-csv', [App\Http\Controllers\Admin\VoterController::class, 'importCsv'])->name('voters.import-csv');
     Route::get('/voters/download-template', [App\Http\Controllers\Admin\VoterController::class, 'downloadTemplate'])->name('voters.download-template');
+    Route::get('/voters/export', [App\Http\Controllers\Admin\VoterController::class, 'exportCsv'])->name('voters.export');
     Route::resource('voters', App\Http\Controllers\Admin\VoterController::class);
     
     // QR Code Generator
