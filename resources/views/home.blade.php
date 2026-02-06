@@ -497,6 +497,9 @@
             cursor: not-allowed;
             transform: none;
         }
+        .data-load-status.status-loading { color: #0369a1; display: block !important; }
+        .data-load-status.status-success { color: #0d9488; display: block !important; }
+        .data-load-status.status-error { color: #dc2626; display: block !important; }
         
         @media (max-width: 768px) {
             .form-row {
@@ -1537,6 +1540,8 @@
                 <i class="fas fa-download"></i> ডেটা লোড
             </button>
             <p class="data-load-hint text-muted" style="margin-top: 8px; font-size: 0.9rem;">অফলাইন খোঁজের জন্য ভোটার ডেটা ডাউনলোড করুন</p>
+            <div id="dataLoadStatus" class="data-load-status" style="margin-top: 12px; font-size: 1rem; font-weight: 600; min-height: 24px; display: none;"></div>
+            <p id="dataLoadTimeHint" class="text-muted" style="margin-top: 6px; font-size: 0.85rem; display: none;">প্রায় ৫-১৫ মিনিট সময় লাগতে পারে। পৃষ্ঠা বন্ধ করবেন না।</p>
         </div>
         
     </div>
@@ -1733,6 +1738,17 @@
     <script src="/js/pwa.js?v=2"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            var statusEl = document.getElementById('dataLoadStatus');
+            var timeHintEl = document.getElementById('dataLoadTimeHint');
+            function setStatus(text, type) {
+                if (!statusEl) return;
+                statusEl.textContent = text;
+                statusEl.className = 'data-load-status status-' + (type || '');
+                statusEl.style.display = text ? 'block' : 'none';
+            }
+            function setTimeHint(show) {
+                if (timeHintEl) timeHintEl.style.display = show ? 'block' : 'none';
+            }
             document.body.addEventListener('click', async function(e) {
                 var btn = e.target.closest('#homeDataLoadBtn');
                 if (!btn || btn.disabled) return;
@@ -1743,16 +1759,37 @@
                 }
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...';
+                setStatus('ডেটা লোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন', 'loading');
+                setTimeHint(true);
+                var progressHandler = function(ev) {
+                    var d = ev.detail || {};
+                    var loaded = d.loaded || 0;
+                    var total = d.total || 0;
+                    var minLeft = d.estimatedMinutesLeft;
+                    var msg = 'ডেটা লোড হচ্ছে... ' + loaded.toLocaleString('en-BD') + ' / ' + total.toLocaleString('en-BD') + ' ভোটার লোড হয়েছে';
+                    if (minLeft !== undefined && minLeft > 0) {
+                        msg += ' (প্রায় ' + minLeft + ' মিনিট বাকি)';
+                    }
+                    setStatus(msg, 'loading');
+                };
+                window.addEventListener('pwaVoterLoadProgress', progressHandler);
                 try {
                     await loadVoterData();
+                    setStatus('ডেটা লোড সম্পন্ন হয়েছে', 'success');
+                    setTimeHint(false);
+                    setTimeout(function() { setStatus(''); }, 5000);
                 } catch (err) {
                     console.error(err);
-                    if (typeof pwaHelper !== 'undefined' && pwaHelper.showNotification) {
-                        pwaHelper.showNotification('ডেটা লোড ব্যর্থ', 'পুনরায় চেষ্টা করুন', 'warning');
+                    setStatus('ডেটা লোড ব্যর্থ। পুনরায় চেষ্টা করুন।', 'error');
+                    setTimeHint(false);
+                    if (typeof window.pwaHelper !== 'undefined' && window.pwaHelper.showNotification) {
+                        window.pwaHelper.showNotification('ডেটা লোড ব্যর্থ', 'পুনরায় চেষ্টা করুন', 'warning');
                     } else {
                         alert('ডেটা লোড ব্যর্থ। পুনরায় চেষ্টা করুন।');
                     }
+                    setTimeout(function() { setStatus(''); }, 5000);
                 }
+                window.removeEventListener('pwaVoterLoadProgress', progressHandler);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-download"></i> ডেটা লোড';
             });

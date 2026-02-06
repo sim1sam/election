@@ -151,6 +151,17 @@ class PWAHelper {
           allVoters = allVoters.concat(data.voters);
           totalLoaded += data.voters.length;
           
+          // Dispatch progress so UI can show "X/Y loaded" and estimated time
+          var estimatedSecPer100 = 2.5;
+          var remaining = Math.max(0, (totalCount - totalLoaded));
+          var estimatedSecondsLeft = Math.ceil((remaining / 100) * estimatedSecPer100);
+          var estimatedMinutesLeft = Math.ceil(estimatedSecondsLeft / 60);
+          try {
+            window.dispatchEvent(new CustomEvent('pwaVoterLoadProgress', {
+              detail: { loaded: totalLoaded, total: totalCount, estimatedMinutesLeft: estimatedMinutesLeft }
+            }));
+          } catch (e) {}
+          
           // Check if there are more pages
           if (!data.has_more || data.voters.length < data.per_page) {
             break;
