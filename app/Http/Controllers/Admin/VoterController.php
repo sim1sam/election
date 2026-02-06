@@ -7,7 +7,9 @@ use App\Models\Voter;
 use App\Services\VoterImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\NumberConverter;
+use Carbon\Carbon;
 
 class VoterController extends Controller
 {
@@ -52,8 +54,12 @@ class VoterController extends Controller
         if ($request->filled('date_of_birth')) {
             try {
                 $dobValue = trim($request->date_of_birth);
-                $dobValue = NumberConverter::convertDateToEnglish($dobValue);
-                $searchDate = null;
+                if (empty($dobValue)) {
+                    // Skip if empty after trim
+                    $searchDate = null;
+                } else {
+                    $dobValue = NumberConverter::convertDateToEnglish($dobValue);
+                    $searchDate = null;
                 
                 // Parse date - prioritize dd/mm/yyyy format (Bangladesh format)
                 if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dobValue, $matches)) {
@@ -65,30 +71,45 @@ class VoterController extends Controller
                     if ($first > 12) {
                         $day = $first;
                         $month = $second;
-                        $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                        try {
+                            $parsedDate = Carbon::create($year, $month, $day);
+                            $searchDate = $parsedDate->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            $searchDate = null;
+                        }
                     } elseif ($second > 12) {
                         $month = $first;
                         $day = $second;
-                        $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                        try {
+                            $parsedDate = Carbon::create($year, $month, $day);
+                            $searchDate = $parsedDate->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            $searchDate = null;
+                        }
                     } else {
                         // Ambiguous: prioritize dd/mm/yyyy (Bangladesh format)
                         try {
                             $day = $first;
                             $month = $second;
-                            $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                            $parsedDate = Carbon::create($year, $month, $day);
+                            $searchDate = $parsedDate->format('Y-m-d');
                         } catch (\Exception $e) {
-                            $month = $first;
-                            $day = $second;
-                            $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                            try {
+                                $month = $first;
+                                $day = $second;
+                                $parsedDate = Carbon::create($year, $month, $day);
+                                $searchDate = $parsedDate->format('Y-m-d');
+                            } catch (\Exception $e2) {
+                                $searchDate = null;
+                            }
                         }
                     }
-                    $searchDate = $parsedDate->format('Y-m-d');
                 } else {
                     // Try standard date formats
                     $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'm/d/Y'];
                     foreach ($formats as $format) {
                         try {
-                            $parsedDate = \Carbon\Carbon::createFromFormat($format, $dobValue);
+                            $parsedDate = Carbon::createFromFormat($format, $dobValue);
                             if ($parsedDate !== false && $parsedDate->format($format) === $dobValue) {
                                 $searchDate = $parsedDate->format('Y-m-d');
                                 break;
@@ -99,18 +120,23 @@ class VoterController extends Controller
                     }
                     
                     if (!$searchDate) {
-                        $parsedDate = \Carbon\Carbon::parse($dobValue);
-                        $searchDate = $parsedDate->format('Y-m-d');
+                        try {
+                            $parsedDate = Carbon::parse($dobValue);
+                            $searchDate = $parsedDate->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            $searchDate = null;
+                        }
                     }
                 }
                 
-                if ($searchDate) {
-                    $query->whereDate('date_of_birth', $searchDate);
+                    if ($searchDate) {
+                        $query->whereDate('date_of_birth', $searchDate);
+                    }
                 }
             } catch (\Exception $e) {
                 // Invalid date format, skip filter
-                \Log::warning('Date parsing error in admin voter filter: ' . $e->getMessage(), [
-                    'date_value' => $request->date_of_birth
+                Log::warning('Date parsing error in admin voter filter: ' . $e->getMessage(), [
+                    'date_value' => $request->date_of_birth ?? 'null'
                 ]);
             }
         }
@@ -171,7 +197,11 @@ class VoterController extends Controller
             $validated['date_of_birth'] = NumberConverter::convertDateToEnglish($validated['date_of_birth']);
         }
 
-        Voter::create($validated);
+        // Set ID explicitly since database doesn't have auto-increment
+        $validated['id'] = Voter::getNextSequentialId();
+        
+        // Use DB::table()->insert() to bypass fillable and include 'id'
+        \Illuminate\Support\Facades\DB::table('voters')->insert($validated);
 
         return redirect()->route('admin.voters.index')
             ->with('success', 'Voter created successfully.');
@@ -397,7 +427,7 @@ class VoterController extends Controller
             $query->orderBy('id', 'asc')->chunk(2000, function ($voters) use ($file) {
                 foreach ($voters as $voter) {
                     $dob = $voter->date_of_birth
-                        ? (\Carbon\Carbon::parse($voter->date_of_birth)->format('Y-m-d'))
+                        ? (Carbon::parse($voter->date_of_birth)->format('Y-m-d'))
                         : '';
                     fputcsv($file, [
                         $voter->name ?? '',

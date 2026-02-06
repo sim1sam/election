@@ -199,18 +199,23 @@ class VoterImportService
         DB::beginTransaction();
         try {
             foreach ($insertChunks as $chunk) {
-                Voter::insert($chunk);
+                // Use DB::table()->insert() instead of Model::insert() to allow 'id' field
+                DB::table('voters')->insert($chunk);
             }
             DB::commit();
             $results['success'] += count($insertData);
         } catch (\Exception $e) {
             DB::rollBack();
+            // Fallback: try inserting one by one with explicit ID
             foreach ($insertData as $data) {
                 $rowNumber = $rowMapping[$data['voter_number']] ?? 'unknown';
                 try {
-                    $createData = $data;
-                    unset($createData['id'], $createData['created_at'], $createData['updated_at']);
-                    Voter::create($createData);
+                    // Ensure ID is set (it should already be in $data)
+                    if (!isset($data['id'])) {
+                        $data['id'] = Voter::getNextSequentialId();
+                    }
+                    // Use DB::table()->insert() to bypass fillable and include 'id'
+                    DB::table('voters')->insert($data);
                     $results['success']++;
                 } catch (\Exception $e2) {
                     $results['errors'][] = "Row {$rowNumber}: " . $e2->getMessage();
