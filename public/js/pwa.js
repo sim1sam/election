@@ -106,12 +106,14 @@ class PWAHelper {
       const isLoaded = await voterDB.isDataLoaded();
       if (isLoaded) {
         console.log('[PWA] Voter data already loaded in IndexedDB');
+        this.showNotification('ডেটা লোড হয়েছে', 'ইতিমধ্যে ভোটার ডেটা সংরক্ষণ করা আছে', 'success');
         return;
       }
 
       // Check if we're online
       if (!navigator.onLine) {
         console.log('[PWA] Offline - cannot load voter data');
+        this.showNotification('অফলাইন', 'ইন্টারনেট সংযোগ করুন', 'warning');
         return;
       }
 
@@ -179,12 +181,14 @@ class PWAHelper {
         }
         
         console.log(`[PWA] Loaded and saved ${allVoters.length} voters to IndexedDB`);
-        this.showNotification('ডেটা লোড সম্পন্ন', `${allVoters.length} জন ভোটারের তথ্য সফলভাবে সংরক্ষণ করা হয়েছে`, 'success');
+        this.showNotification('ডেটা লোড হয়েছে', `${allVoters.length} জন ভোটারের তথ্য সংরক্ষণ করা হয়েছে`, 'success');
       } else {
         console.log('[PWA] No voters to load');
+        this.showNotification('ডেটা লোড হয়েছে', 'কোন ভোটার ডেটা নেই', 'info');
       }
     } catch (error) {
       console.error('[PWA] Error loading all voter data:', error);
+      this.showNotification('ডেটা লোড ব্যর্থ', 'পুনরায় চেষ্টা করুন', 'warning');
     }
   }
 
@@ -322,6 +326,7 @@ class PWAHelper {
 
 // Initialize PWA Helper
 const pwaHelper = new PWAHelper();
+window.pwaHelper = pwaHelper;
 
 // Search from IndexedDB when offline
 async function searchFromIndexedDB(wardNumber, dateOfBirth) {

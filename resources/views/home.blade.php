@@ -475,6 +475,29 @@
             transform: translateY(0);
         }
         
+        .btn-data-load {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+        }
+        .btn-data-load:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+        }
+        .btn-data-load:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -1509,6 +1532,13 @@
             </div>
         </div>
         
+        <div class="data-load-wrap" style="margin-top: 24px; text-align: center;">
+            <button type="button" id="homeDataLoadBtn" class="btn-data-load">
+                <i class="fas fa-download"></i> ডেটা লোড
+            </button>
+            <p class="data-load-hint text-muted" style="margin-top: 8px; font-size: 0.9rem;">অফলাইন খোঁজের জন্য ভোটার ডেটা ডাউনলোড করুন</p>
+        </div>
+        
     </div>
     
     <script>
@@ -1701,5 +1731,32 @@
     <!-- PWA Scripts -->
     <script src="/js/indexeddb.js?v=2"></script>
     <script src="/js/pwa.js?v=2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('click', async function(e) {
+                var btn = e.target.closest('#homeDataLoadBtn');
+                if (!btn || btn.disabled) return;
+                var loadVoterData = window.loadVoterData;
+                if (typeof loadVoterData !== 'function') {
+                    alert('ডেটা লোড প্রস্তুত নয়। পৃষ্ঠা রিফ্রেশ করে আবার চেষ্টা করুন।');
+                    return;
+                }
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...';
+                try {
+                    await loadVoterData();
+                } catch (err) {
+                    console.error(err);
+                    if (typeof pwaHelper !== 'undefined' && pwaHelper.showNotification) {
+                        pwaHelper.showNotification('ডেটা লোড ব্যর্থ', 'পুনরায় চেষ্টা করুন', 'warning');
+                    } else {
+                        alert('ডেটা লোড ব্যর্থ। পুনরায় চেষ্টা করুন।');
+                    }
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-download"></i> ডেটা লোড';
+            });
+        });
+    </script>
 </body>
 </html>
