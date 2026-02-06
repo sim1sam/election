@@ -129,11 +129,24 @@
                 <div class="col-12 col-md-4">
                     <div class="form-group">
                         <label for="date_of_birth">জন্ম তারিখ (Date of Birth)</label>
-                        <input type="date" 
-                               name="date_of_birth" 
-                               id="date_of_birth" 
-                               class="form-control" 
-                               value="{{ request('date_of_birth') }}">
+                        <div style="position: relative;">
+                            <input type="text" 
+                                   name="date_of_birth" 
+                                   id="date_of_birth" 
+                                   class="form-control" 
+                                   placeholder="dd/mm/yyyy"
+                                   value="{{ request('date_of_birth') }}"
+                                   pattern="\d{2}/\d{2}/\d{4}"
+                                   maxlength="10">
+                            <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; align-items: center;">
+                                <i class="fas fa-times" id="admin-clear-date-icon"
+                                   style="cursor: pointer; opacity: 0.7; display: none; padding: 5px;"
+                                   title="Clear"></i>
+                                <i class="fas fa-calendar-alt" id="admin-calendar-icon"
+                                   style="cursor: pointer; opacity: 0.7; padding: 5px;"
+                                   title="Select Date"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-12">
@@ -342,7 +355,159 @@
     </script>
 @stop
 
+@section('js')
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const adminDateInput = document.getElementById('date_of_birth');
+        const adminClearIcon = document.getElementById('admin-clear-date-icon');
+        const adminCalendarIcon = document.getElementById('admin-calendar-icon');
+        
+        if (adminDateInput) {
+            const adminFlatpickrInstance = flatpickr(adminDateInput, {
+                dateFormat: "d/m/Y",
+                allowInput: true,
+                clickOpens: true,
+                locale: {
+                    firstDayOfWeek: 6
+                },
+                maxDate: "today",
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0 && dateStr) {
+                        instance.input.value = dateStr;
+                        toggleAdminClearIcon();
+                    } else if (!dateStr) {
+                        instance.input.value = '';
+                        toggleAdminClearIcon();
+                    }
+                },
+                onClose: function(selectedDates, dateStr, instance) {
+                    toggleAdminClearIcon();
+                }
+            });
+            
+            function toggleAdminClearIcon() {
+                if (adminClearIcon) {
+                    if (adminDateInput.value && adminDateInput.value.trim() !== '') {
+                        adminClearIcon.style.display = 'block';
+                    } else {
+                        adminClearIcon.style.display = 'none';
+                    }
+                }
+            }
+            
+            if (adminClearIcon) {
+                adminClearIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    adminDateInput.value = '';
+                    adminFlatpickrInstance.clear();
+                    toggleAdminClearIcon();
+                    adminDateInput.focus();
+                });
+            }
+            
+            if (adminCalendarIcon) {
+                adminCalendarIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    adminFlatpickrInstance.open();
+                });
+            }
+            
+            // Auto-format: dd -> dd/ -> dd/mm -> dd/mm/yyyy
+            let isTyping = false;
+            adminDateInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                
+                // Skip if value is already in correct format from calendar
+                if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                    toggleAdminClearIcon();
+                    return;
+                }
+                
+                isTyping = true;
+                
+                // Remove all non-digits
+                let digitsOnly = value.replace(/\D/g, '');
+                
+                // Limit to 8 digits (ddmmyyyy)
+                if (digitsOnly.length > 8) {
+                    digitsOnly = digitsOnly.substring(0, 8);
+                }
+                
+                // Format as dd/mm/yyyy
+                let formatted = '';
+                if (digitsOnly.length > 0) {
+                    formatted = digitsOnly.substring(0, 2);
+                    if (digitsOnly.length >= 2) {
+                        formatted += '/';
+                    }
+                    if (digitsOnly.length > 2) {
+                        formatted += digitsOnly.substring(2, 4);
+                    }
+                    if (digitsOnly.length >= 4) {
+                        formatted += '/';
+                    }
+                    if (digitsOnly.length > 4) {
+                        formatted += digitsOnly.substring(4, 8);
+                    }
+                }
+                
+                // Update value
+                if (formatted !== value) {
+                    e.target.value = formatted;
+                }
+                
+                // Set cursor position based on digit count
+                let newCursorPos = formatted.length;
+                if (digitsOnly.length === 2) {
+                    // After typing 2 digits (dd), cursor goes after "/"
+                    newCursorPos = 3; // Position after "dd/"
+                } else if (digitsOnly.length === 4) {
+                    // After typing 4 digits (ddmm), cursor goes after second "/"
+                    newCursorPos = 6; // Position after "dd/mm/"
+                } else if (digitsOnly.length > 4) {
+                    // In year section, cursor at end
+                    newCursorPos = formatted.length;
+                }
+                
+                // Set cursor position
+                setTimeout(function() {
+                    e.target.setSelectionRange(newCursorPos, newCursorPos);
+                    isTyping = false;
+                }, 0);
+                
+                toggleAdminClearIcon();
+            });
+            
+            // Handle backspace
+            adminDateInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace') {
+                    const cursorPos = e.target.selectionStart;
+                    const value = e.target.value;
+                    
+                    if (cursorPos > 0 && value.charAt(cursorPos - 1) === '/') {
+                        e.preventDefault();
+                        const beforeSlash = value.substring(0, cursorPos - 2);
+                        const afterSlash = value.substring(cursorPos);
+                        e.target.value = beforeSlash + afterSlash;
+                        e.target.setSelectionRange(cursorPos - 2, cursorPos - 2);
+                        toggleAdminClearIcon();
+                    }
+                }
+            });
+            
+            toggleAdminClearIcon();
+        }
+    });
+</script>
+@stop
+
 @section('css')
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     @media (max-width: 768px) {
         .table-responsive {

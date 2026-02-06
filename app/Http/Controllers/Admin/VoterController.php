@@ -48,10 +48,71 @@ class VoterController extends Controller
             $query->where('voter_serial_number', 'like', '%' . $voterSerialNumber . '%');
         }
 
-        // Filter by date of birth (জন্ম তারিখ)
+        // Filter by date of birth (জন্ম তারিখ) - parse dd/mm/yyyy format
         if ($request->filled('date_of_birth')) {
-            $dob = $request->date_of_birth;
-            $query->whereDate('date_of_birth', $dob);
+            try {
+                $dobValue = trim($request->date_of_birth);
+                $dobValue = NumberConverter::convertDateToEnglish($dobValue);
+                $searchDate = null;
+                
+                // Parse date - prioritize dd/mm/yyyy format (Bangladesh format)
+                if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dobValue, $matches)) {
+                    $first = (int)$matches[1];
+                    $second = (int)$matches[2];
+                    $year = (int)$matches[3];
+                    
+                    // If first part > 12, it must be dd/mm/yyyy format
+                    if ($first > 12) {
+                        $day = $first;
+                        $month = $second;
+                        $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                    } elseif ($second > 12) {
+                        $month = $first;
+                        $day = $second;
+                        $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                    } else {
+                        // Ambiguous: prioritize dd/mm/yyyy (Bangladesh format)
+                        try {
+                            $day = $first;
+                            $month = $second;
+                            $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                        } catch (\Exception $e) {
+                            $month = $first;
+                            $day = $second;
+                            $parsedDate = \Carbon\Carbon::create($year, $month, $day);
+                        }
+                    }
+                    $searchDate = $parsedDate->format('Y-m-d');
+                } else {
+                    // Try standard date formats
+                    $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'm/d/Y'];
+                    foreach ($formats as $format) {
+                        try {
+                            $parsedDate = \Carbon\Carbon::createFromFormat($format, $dobValue);
+                            if ($parsedDate !== false && $parsedDate->format($format) === $dobValue) {
+                                $searchDate = $parsedDate->format('Y-m-d');
+                                break;
+                            }
+                        } catch (\Exception $e) {
+                            continue;
+                        }
+                    }
+                    
+                    if (!$searchDate) {
+                        $parsedDate = \Carbon\Carbon::parse($dobValue);
+                        $searchDate = $parsedDate->format('Y-m-d');
+                    }
+                }
+                
+                if ($searchDate) {
+                    $query->whereDate('date_of_birth', $searchDate);
+                }
+            } catch (\Exception $e) {
+                // Invalid date format, skip filter
+                \Log::warning('Date parsing error in admin voter filter: ' . $e->getMessage(), [
+                    'date_value' => $request->date_of_birth
+                ]);
+            }
         }
 
         $voters = $query->orderBy('id', 'asc')->paginate(20)->withQueryString();
