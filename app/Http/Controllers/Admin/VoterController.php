@@ -263,6 +263,7 @@ class VoterController extends Controller
      */
     public function exportCsv(Request $request)
     {
+        set_time_limit(0); // Allow long-running export (e.g. 400k+ rows)
         $query = Voter::query();
 
         if ($request->filled('name')) {
@@ -288,11 +289,10 @@ class VoterController extends Controller
             $query->whereDate('date_of_birth', $request->date_of_birth);
         }
 
-        $voters = $query->orderBy('id', 'asc')->get();
-
         $filename = 'voters_export_' . date('Y-m-d_His') . '.csv';
 
-        return response()->streamDownload(function () use ($voters) {
+        // Stream CSV in chunks to avoid memory limit (export all = 400k+ rows)
+        return response()->streamDownload(function () use ($request) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
             fputcsv($file, [
@@ -308,24 +308,51 @@ class VoterController extends Controller
                 'ভোটার সিরিয়াল নম্বর (Voter Serial Number)',
                 'জন্ম তারিখ (Date of Birth)',
             ]);
-            foreach ($voters as $voter) {
-                $dob = $voter->date_of_birth
-                    ? (\Carbon\Carbon::parse($voter->date_of_birth)->format('Y-m-d'))
-                    : '';
-                fputcsv($file, [
-                    $voter->name ?? '',
-                    "'" . ($voter->voter_number ?? ''),
-                    $voter->father_name ?? '',
-                    $voter->mother_name ?? '',
-                    $voter->occupation ?? '',
-                    $voter->address ?? '',
-                    $voter->polling_center_name ?? '',
-                    $voter->ward_number ?? '',
-                    $voter->voter_area_number ?? '',
-                    $voter->voter_serial_number ?? '',
-                    $dob,
-                ]);
+
+            $query = Voter::query();
+            if ($request->filled('name')) {
+                $query->where('name', 'like', '%' . $request->name . '%');
             }
+            if ($request->filled('voter_number')) {
+                $voterNumber = NumberConverter::banglaToEnglish($request->voter_number);
+                $query->where('voter_number', 'like', '%' . $voterNumber . '%');
+            }
+            if ($request->filled('ward_number')) {
+                $wardNumber = NumberConverter::banglaToEnglish($request->ward_number);
+                $query->where('ward_number', 'like', '%' . $wardNumber . '%');
+            }
+            if ($request->filled('voter_area_number')) {
+                $voterAreaNumber = NumberConverter::banglaToEnglish($request->voter_area_number);
+                $query->where('voter_area_number', 'like', '%' . $voterAreaNumber . '%');
+            }
+            if ($request->filled('voter_serial_number')) {
+                $voterSerialNumber = NumberConverter::banglaToEnglish($request->voter_serial_number);
+                $query->where('voter_serial_number', 'like', '%' . $voterSerialNumber . '%');
+            }
+            if ($request->filled('date_of_birth')) {
+                $query->whereDate('date_of_birth', $request->date_of_birth);
+            }
+
+            $query->orderBy('id', 'asc')->chunk(2000, function ($voters) use ($file) {
+                foreach ($voters as $voter) {
+                    $dob = $voter->date_of_birth
+                        ? (\Carbon\Carbon::parse($voter->date_of_birth)->format('Y-m-d'))
+                        : '';
+                    fputcsv($file, [
+                        $voter->name ?? '',
+                        "'" . ($voter->voter_number ?? ''),
+                        $voter->father_name ?? '',
+                        $voter->mother_name ?? '',
+                        $voter->occupation ?? '',
+                        $voter->address ?? '',
+                        $voter->polling_center_name ?? '',
+                        $voter->ward_number ?? '',
+                        $voter->voter_area_number ?? '',
+                        $voter->voter_serial_number ?? '',
+                        $dob,
+                    ]);
+                }
+            });
             fclose($file);
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
