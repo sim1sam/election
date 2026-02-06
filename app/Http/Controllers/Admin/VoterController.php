@@ -48,6 +48,12 @@ class VoterController extends Controller
             $query->where('voter_serial_number', 'like', '%' . $voterSerialNumber . '%');
         }
 
+        // Filter by date of birth (জন্ম তারিখ)
+        if ($request->filled('date_of_birth')) {
+            $dob = $request->date_of_birth;
+            $query->whereDate('date_of_birth', $dob);
+        }
+
         $voters = $query->orderBy('id', 'asc')->paginate(20)->withQueryString();
         
         return view('admin.voters.index', compact('voters'));

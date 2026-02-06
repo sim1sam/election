@@ -122,12 +122,22 @@
                                placeholder="Enter voter serial number">
                     </div>
                 </div>
+                <div class="col-12 col-md-4">
+                    <div class="form-group">
+                        <label for="date_of_birth">জন্ম তারিখ (Date of Birth)</label>
+                        <input type="date" 
+                               name="date_of_birth" 
+                               id="date_of_birth" 
+                               class="form-control" 
+                               value="{{ request('date_of_birth') }}">
+                    </div>
+                </div>
                 <div class="col-12">
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary btn-block btn-sm">
                             <i class="fas fa-search"></i> Search
                         </button>
-                        @if(request()->hasAny(['name', 'voter_number', 'voter_area_number', 'ward_number', 'voter_serial_number']))
+                        @if(request()->hasAny(['name', 'voter_number', 'voter_area_number', 'ward_number', 'voter_serial_number', 'date_of_birth']))
                             <a href="{{ route('admin.voters.index') }}" class="btn btn-secondary btn-block btn-sm mt-2">
                                 <i class="fas fa-times"></i> Clear
                             </a>
@@ -140,7 +150,7 @@
 
     <div class="card">
         <div class="card-body">
-            @if(request()->hasAny(['name', 'voter_number', 'voter_area_number', 'ward_number', 'voter_serial_number']))
+            @if(request()->hasAny(['name', 'voter_number', 'voter_area_number', 'ward_number', 'voter_serial_number', 'date_of_birth']))
                 <div class="alert alert-info mb-3">
                     <i class="fas fa-info-circle"></i> 
                     Showing search results. 
