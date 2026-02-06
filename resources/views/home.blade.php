@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         * {
             margin: 0;
@@ -401,7 +403,7 @@
         
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 20px;
             align-items: end;
         }
@@ -415,6 +417,11 @@
             display: flex;
             flex-direction: column;
         }
+        .form-group.form-group-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
         .form-group.form-group-btn label.btn-label-spacer {
             font-size: 1.1rem;
             font-weight: 600;
@@ -422,6 +429,10 @@
             visibility: hidden;
             height: 1.5em;
             line-height: 1.2;
+        }
+        .form-group.form-group-btn .btn-search {
+            width: 100%;
+            align-self: flex-end;
         }
         
         .form-group label {
@@ -1493,11 +1504,26 @@
                         </div>
                         <div class="form-group">
                             <label for="date_of_birth">জন্ম তারিখ: <span class="text-danger">*</span></label>
-                            <input type="date" name="date_of_birth" id="date_of_birth" 
-                                   class="form-control" value="{{ old('date_of_birth') }}" required>
+                            <div style="position: relative;">
+                                <input type="text" name="date_of_birth" id="date_of_birth" 
+                                       class="form-control" 
+                                       placeholder="dd/mm/yyyy" 
+                                       value="{{ old('date_of_birth') }}"
+                                       pattern="\d{2}/\d{2}/\d{4}"
+                                       maxlength="10"
+                                       required>
+                                <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; align-items: center;">
+                                    <i class="fas fa-times clear-date" id="home-clear-date-icon"
+                                       style="cursor: pointer; opacity: 0.7; display: none; padding: 5px;"
+                                       title="Clear"></i>
+                                    <i class="fas fa-calendar-alt" id="home-calendar-icon"
+                                       style="cursor: pointer; opacity: 0.7; padding: 5px;"
+                                       title="Select Date"></i>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="name">নাম <span class="text-muted">(ঐচ্ছিক)</span></label>
+                            <label for="name">নাম (ঐচ্ছিক - বাংলায় লিখুন)</label>
                             <input type="text" name="name" id="name" 
                                    class="form-control" placeholder="নাম লিখুন" 
                                    value="{{ old('name') }}">
@@ -1731,6 +1757,156 @@
             carouselContainer.addEventListener('mouseleave', startAutoSlide);
         }
         @endif
+    </script>
+    
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const homeDateInput = document.getElementById('date_of_birth');
+            const homeClearIcon = document.getElementById('home-clear-date-icon');
+            const homeCalendarIcon = document.getElementById('home-calendar-icon');
+            
+            if (homeDateInput) {
+                const homeFlatpickrInstance = flatpickr(homeDateInput, {
+                    dateFormat: "d/m/Y",
+                    allowInput: true,
+                    clickOpens: true,
+                    locale: {
+                        firstDayOfWeek: 6
+                    },
+                    maxDate: "today",
+                    onChange: function(selectedDates, dateStr, instance) {
+                        // Only format if date was selected from calendar, not manual typing
+                        if (selectedDates.length > 0 && dateStr) {
+                            instance.input.value = dateStr;
+                            toggleHomeClearIcon();
+                        } else if (!dateStr) {
+                            instance.input.value = '';
+                            toggleHomeClearIcon();
+                        }
+                    },
+                    onClose: function(selectedDates, dateStr, instance) {
+                        toggleHomeClearIcon();
+                    }
+                });
+                
+                function toggleHomeClearIcon() {
+                    if (homeClearIcon) {
+                        if (homeDateInput.value && homeDateInput.value.trim() !== '') {
+                            homeClearIcon.style.display = 'block';
+                        } else {
+                            homeClearIcon.style.display = 'none';
+                        }
+                    }
+                }
+                
+                if (homeClearIcon) {
+                    homeClearIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        homeDateInput.value = '';
+                        homeFlatpickrInstance.clear();
+                        toggleHomeClearIcon();
+                        homeDateInput.focus();
+                    });
+                }
+                
+                if (homeCalendarIcon) {
+                    homeCalendarIcon.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        homeFlatpickrInstance.open();
+                    });
+                }
+                
+                // Auto-format: dd -> dd/ -> dd/mm -> dd/mm/yyyy
+                let isTyping = false;
+                homeDateInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    
+                    // Skip if value is already in correct format from calendar
+                    if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                        toggleHomeClearIcon();
+                        return;
+                    }
+                    
+                    isTyping = true;
+                    
+                    // Remove all non-digits
+                    let digitsOnly = value.replace(/\D/g, '');
+                    
+                    // Limit to 8 digits (ddmmyyyy)
+                    if (digitsOnly.length > 8) {
+                        digitsOnly = digitsOnly.substring(0, 8);
+                    }
+                    
+                    // Format as dd/mm/yyyy
+                    let formatted = '';
+                    if (digitsOnly.length > 0) {
+                        formatted = digitsOnly.substring(0, 2);
+                        if (digitsOnly.length >= 2) {
+                            formatted += '/';
+                        }
+                        if (digitsOnly.length > 2) {
+                            formatted += digitsOnly.substring(2, 4);
+                        }
+                        if (digitsOnly.length >= 4) {
+                            formatted += '/';
+                        }
+                        if (digitsOnly.length > 4) {
+                            formatted += digitsOnly.substring(4, 8);
+                        }
+                    }
+                    
+                    // Update value
+                    if (formatted !== value) {
+                        e.target.value = formatted;
+                    }
+                    
+                    // Set cursor position based on digit count
+                    let newCursorPos = formatted.length;
+                    if (digitsOnly.length === 2) {
+                        // After typing 2 digits (dd), cursor goes after "/"
+                        newCursorPos = 3; // Position after "dd/"
+                    } else if (digitsOnly.length === 4) {
+                        // After typing 4 digits (ddmm), cursor goes after second "/"
+                        newCursorPos = 6; // Position after "dd/mm/"
+                    } else if (digitsOnly.length > 4) {
+                        // In year section, cursor at end
+                        newCursorPos = formatted.length;
+                    }
+                    
+                    // Set cursor position
+                    setTimeout(function() {
+                        e.target.setSelectionRange(newCursorPos, newCursorPos);
+                        isTyping = false;
+                    }, 0);
+                    
+                    toggleHomeClearIcon();
+                });
+                
+                // Handle backspace to allow deletion
+                homeDateInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace') {
+                        const cursorPos = e.target.selectionStart;
+                        const value = e.target.value;
+                        
+                        // If cursor is right after a slash, delete the slash and previous digit
+                        if (cursorPos > 0 && value.charAt(cursorPos - 1) === '/') {
+                            e.preventDefault();
+                            const beforeSlash = value.substring(0, cursorPos - 2);
+                            const afterSlash = value.substring(cursorPos);
+                            e.target.value = beforeSlash + afterSlash;
+                            e.target.setSelectionRange(cursorPos - 2, cursorPos - 2);
+                            toggleHomeClearIcon();
+                        }
+                    }
+                });
+                
+                toggleHomeClearIcon();
+            }
+        });
     </script>
     
     <!-- PWA Scripts -->

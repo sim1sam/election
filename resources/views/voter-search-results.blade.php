@@ -163,6 +163,7 @@
             box-shadow: 0 4px 24px rgba(14, 165, 233, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.85);
             transition: all 0.3s ease;
+            position: relative;
         }
         
         .voter-card:hover {
@@ -171,10 +172,46 @@
             background: rgba(255, 255, 255, 0.85);
         }
         
+        .voter-card-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(220, 38, 38, 0.1);
+            border: 2px solid rgba(220, 38, 38, 0.3);
+            color: #dc2626;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .voter-card-close:hover {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.5);
+            transform: scale(1.1);
+        }
+        
+        .voter-card-close:active {
+            transform: scale(0.95);
+        }
+        
+        .voter-card.hiding {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+        
         .voter-card-header {
             border-bottom: 2px solid rgba(14, 165, 233, 0.3);
             padding-bottom: 15px;
             margin-bottom: 15px;
+            padding-right: 40px;
         }
         
         .voter-name {
@@ -507,7 +544,10 @@
         @if($voters && $voters->count() > 0)
             <div class="voters-grid">
                 @foreach($voters as $voter)
-                    <div class="voter-card">
+                    <div class="voter-card" id="voter-card-{{ $voter->id }}">
+                        <button type="button" class="voter-card-close" onclick="hideVoterCard({{ $voter->id }})" title="কার্ড সরান">
+                            <i class="fas fa-times"></i>
+                        </button>
                         <div class="voter-card-header">
                             <div class="voter-name">{{ $voter->name }}</div>
                             <div class="voter-number">
@@ -622,6 +662,29 @@
     </div>
     
     <script>
+        function hideVoterCard(voterId) {
+            const card = document.getElementById('voter-card-' + voterId);
+            if (card) {
+                card.classList.add('hiding');
+                setTimeout(function() {
+                    card.style.display = 'none';
+                    updateResultsCount();
+                }, 300);
+            }
+        }
+        
+        function updateResultsCount() {
+            const visibleCards = document.querySelectorAll('.voter-card:not([style*="display: none"])').length;
+            const resultsCountEl = document.querySelector('.results-count');
+            if (resultsCountEl && visibleCards >= 0) {
+                const bengaliCount = visibleCards.toString().split('').map(d => {
+                    const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+                    return bengaliDigits[parseInt(d)] || d;
+                }).join('');
+                resultsCountEl.textContent = 'মোট ' + bengaliCount + ' জন ভোটার পাওয়া গেছে';
+            }
+        }
+        
         function showFullDetails(button, voterId) {
             const voterCard = button.closest('.voter-card');
             const fullDetails = voterCard.querySelector('#details-' + voterId);
