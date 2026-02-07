@@ -1693,8 +1693,9 @@
                 document.getElementById('waitingMessage').classList.add('hidden');
                 document.getElementById('countdownSection').classList.add('hidden');
                 
-                // Show search section
+                // Show search section and refresh CSRF so form does not 419
                 document.getElementById('searchSection').classList.remove('hidden');
+                refreshCsrfToken();
                 return;
             }
             
@@ -1725,7 +1726,22 @@
             document.getElementById('waitingMessage').classList.add('hidden');
             document.getElementById('countdownSection').classList.add('hidden');
             document.getElementById('searchSection').classList.remove('hidden');
+            refreshCsrfToken();
         }
+        
+        // Refresh CSRF token periodically so long wait does not cause 419
+        function refreshCsrfToken() {
+            var form = document.getElementById('homeSearchForm');
+            if (!form) return;
+            fetch('{{ url("/csrf-token") }}', { headers: { 'Accept': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var input = form.querySelector('input[name="_token"]');
+                    if (input && data.token) { input.value = data.token; }
+                })
+                .catch(function() {});
+        }
+        setInterval(refreshCsrfToken, 10 * 60 * 1000);
         
         // Show campaign modal on page load (only if popups exist)
         @if($popups && $popups->count() > 0)

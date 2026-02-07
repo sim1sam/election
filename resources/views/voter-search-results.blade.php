@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#87CEEB">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="ঢাকা-১৩ আসনের ভোটারদের তথ্য">
     <title>ঢাকা–১৩ আসনের ভোটারদের তথ্য</title>
     <link rel="manifest" href="/manifest.json">
@@ -662,6 +663,19 @@
     </div>
     
     <script>
+        // Refresh CSRF token periodically (for any form/link that may need it)
+        function refreshCsrfToken() {
+            fetch('{{ url("/csrf-token") }}', { headers: { 'Accept': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var meta = document.querySelector('meta[name="csrf-token"]');
+                    if (meta && data.token) meta.setAttribute('content', data.token);
+                })
+                .catch(function() {});
+        }
+        refreshCsrfToken();
+        setInterval(refreshCsrfToken, 10 * 60 * 1000);
+
         function hideVoterCard(voterId) {
             const card = document.getElementById('voter-card-' + voterId);
             if (card) {

@@ -905,6 +905,21 @@
                     // If online, let form submit normally to server
                 });
             }
+            
+            // Refresh CSRF token periodically to avoid 419 when user waits on page
+            function refreshCsrfToken() {
+                var form = document.getElementById('searchForm');
+                if (!form) return;
+                fetch('{{ url("/csrf-token") }}', { headers: { 'Accept': 'application/json' } })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var input = form.querySelector('input[name="_token"]');
+                        if (input && data.token) { input.value = data.token; }
+                    })
+                    .catch(function() {});
+            }
+            refreshCsrfToken();
+            setInterval(refreshCsrfToken, 10 * 60 * 1000);
         });
     </script>
 </body>

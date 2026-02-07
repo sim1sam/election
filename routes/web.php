@@ -9,6 +9,11 @@ Route::get('/', function () {
     return view('home', compact('popups', 'settings'));
 });
 
+// Refresh CSRF token (avoids 419 when user waits on page e.g. during countdown)
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+})->name('csrf-token');
+
 // QR Code scan tracking
 Route::get('/qrcode/scan/{id}', [App\Http\Controllers\QRCodeScanController::class, 'track'])->name('qrcode.scan');
 
