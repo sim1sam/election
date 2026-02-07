@@ -176,16 +176,10 @@
                                 <div class="quick-desc">একসাথে ভোটার যোগ করুন</div>
                             </div>
                         </a>
-                        <a href="{{ route('admin.popups.index') }}" class="card quick-card mb-2">
+                        <a href="{{ route('admin.popups.index') }}" class="card quick-card">
                             <div class="card-body">
                                 <span class="quick-title"><i class="fas fa-image text-secondary mr-2"></i> পপআপ ব্যবস্থাপনা</span>
                                 <div class="quick-desc">ক্যান্ডিডেট/আইকন ইমেজ ও বার্তা</div>
-                            </div>
-                        </a>
-                        <a href="{{ url('/search') }}" target="_blank" class="card quick-card">
-                            <div class="card-body">
-                                <span class="quick-title"><i class="fas fa-search text-info mr-2"></i> পাবলিক ভোটার খোঁজ <i class="fas fa-external-link-alt small"></i></span>
-                                <div class="quick-desc">সাইটে ভোটার খোঁজ পেজ দেখুন</div>
                             </div>
                         </a>
                     </div>
