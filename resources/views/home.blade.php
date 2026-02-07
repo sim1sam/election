@@ -18,7 +18,9 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+        html {
+            overflow-x: hidden;
+        }
         body {
             font-family: 'Noto Sans Bengali', sans-serif;
             background: linear-gradient(135deg, #E0F7FA 0%, #B3E5FC 35%, #81D4FA 70%, #4FC3F7 100%);
@@ -27,6 +29,8 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
         }
         /* Line-wise abstract: diagonal stripes */
         body::before {
@@ -132,6 +136,7 @@
         }
         .container {
             max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -181,10 +186,14 @@
         }
         
         @media (max-width: 480px) {
+            body { padding: 12px; }
             .info-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
+        }
+        @media (max-width: 360px) {
+            body { padding: 8px; }
         }
         
         .info-item {
@@ -391,6 +400,7 @@
         
         .search-form-container {
             max-width: 800px;
+            width: 100%;
             margin: 0 auto;
         }
         
@@ -399,6 +409,8 @@
             padding: 49px 8px;
             border-radius: 15px;
             border: 1px solid rgba(14, 165, 233, 0.2);
+            width: 100%;
+            max-width: 100%;
         }
         
         .form-row {
@@ -410,12 +422,14 @@
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
+                min-width: 0;
             }
         }
         
         .form-group {
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
         .form-group.form-group-btn {
             display: flex;
@@ -455,16 +469,64 @@
             color: #0c4a6e;
             font-size: 1rem;
             font-family: 'Noto Sans Bengali', sans-serif;
+            width: 100%;
+            max-width: 100%;
+        }
+        .form-group {
+            min-width: 0;
         }
         
         .form-control::placeholder {
             color: rgba(12, 74, 110, 0.5);
+        }
+        .date-of-birth-wrap .form-control::placeholder {
+            color: rgba(12, 74, 110, 0.65);
+        }
+        @media (max-width: 768px) {
+            .date-of-birth-wrap .form-control::placeholder {
+                color: rgba(12, 74, 110, 0.8);
+            }
         }
         
         .form-control:focus {
             outline: none;
             border-color: #0ea5e9;
             background: #fff;
+        }
+        /* Date of birth wrapper: keep input inside layout on iOS */
+        .date-of-birth-wrap {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .date-of-birth-wrap .form-control {
+            padding-right: 42px;
+            width: 100%;
+            max-width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        @supports (-webkit-touch-callout: none) {
+            .date-of-birth-wrap {
+                overflow: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+            .date-of-birth-wrap .form-control {
+                max-width: 100%;
+                box-sizing: border-box;
+                font-size: 16px;
+            }
+        }
+        @media (max-width: 768px) {
+            .form-control {
+                min-height: 48px;
+                padding: 14px 15px;
+            }
+            .date-of-birth-wrap .form-control {
+                min-height: 48px;
+                padding: 14px 42px 14px 15px;
+            }
         }
         
         .btn-search {
@@ -1503,26 +1565,30 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ward_number">ওয়ার্ড নম্বর: <span class="text-danger">*</span></label>
-                            <input type="text" name="ward_number" id="ward_number" 
-                                   class="form-control" placeholder="ওয়ার্ড নম্বর লিখুন" 
-                                   value="{{ old('ward_number') }}" required>
+                            <select name="ward_number" id="ward_number" class="form-control" required>
+                                <option value="">ওয়ার্ড নম্বর নির্বাচন করুন</option>
+                                @foreach(['28','29','30','31','32','33','34'] as $ward)
+                                    <option value="{{ $ward }}" {{ old('ward_number') == $ward ? 'selected' : '' }}>{{ $ward }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="date_of_birth">জন্ম তারিখ: <span class="text-danger">*</span></label>
-                            <div style="position: relative;">
+                            <div class="date-of-birth-wrap">
                                 <input type="text" name="date_of_birth" id="date_of_birth" 
                                        class="form-control" 
                                        placeholder="dd/mm/yyyy" 
                                        value="{{ old('date_of_birth') }}"
                                        pattern="\d{2}/\d{2}/\d{4}"
                                        maxlength="10"
-                                       required>
-                                <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; align-items: center;">
+                                       required
+                                       autocomplete="off">
+                                <div class="date-input-icons" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; align-items: center; pointer-events: none;">
                                     <i class="fas fa-times clear-date" id="home-clear-date-icon"
-                                       style="cursor: pointer; opacity: 0.7; display: none; padding: 5px;"
+                                       style="cursor: pointer; opacity: 0.7; display: none; padding: 5px; pointer-events: auto;"
                                        title="Clear"></i>
                                     <i class="fas fa-calendar-alt" id="home-calendar-icon"
-                                       style="cursor: pointer; opacity: 0.7; padding: 5px;"
+                                       style="cursor: pointer; opacity: 0.7; padding: 5px; pointer-events: auto;"
                                        title="Select Date"></i>
                                 </div>
                             </div>
@@ -1775,6 +1841,7 @@
             if (homeDateInput) {
                 const homeFlatpickrInstance = flatpickr(homeDateInput, {
                     dateFormat: "d/m/Y",
+                    defaultDate: "today",
                     allowInput: true,
                     clickOpens: true,
                     locale: {
@@ -1796,6 +1863,17 @@
                     }
                 });
                 
+                // Auto-set today's date when field is empty (so it always shows a date)
+                function setTodayIfEmpty() {
+                    if (!homeDateInput.value || homeDateInput.value.trim() === '') {
+                        var d = new Date();
+                        var todayStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+                        homeDateInput.value = todayStr;
+                        homeFlatpickrInstance.setDate(todayStr, false);
+                    }
+                }
+                setTodayIfEmpty();
+                
                 function toggleHomeClearIcon() {
                     if (homeClearIcon) {
                         if (homeDateInput.value && homeDateInput.value.trim() !== '') {
@@ -1805,6 +1883,7 @@
                         }
                     }
                 }
+                toggleHomeClearIcon();
                 
                 if (homeClearIcon) {
                     homeClearIcon.addEventListener('click', function(e) {
